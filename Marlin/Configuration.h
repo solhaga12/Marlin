@@ -114,6 +114,8 @@
  */
 #define SERIAL_PORT 0
 
+// JEGE
+
 /**
  * This setting determines the communication speed of the printer.
  *
