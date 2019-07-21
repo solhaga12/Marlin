@@ -319,7 +319,7 @@ void menu_backlash();
   #endif // PID_PARAMS_PER_HOTEND
 #endif // HOTENDS
 
-#define SHOW_MENU_ADVANCED_TEMPERATURE ((ENABLED(AUTOTEMP) && HAS_TEMP_HOTEND) || EITHER(PID_AUTOTUNE_MENU, PID_EDIT_MENU))
+//#define SHOW_MENU_ADVANCED_TEMPERATURE ((ENABLED(AUTOTEMP) && HAS_TEMP_HOTEND) || EITHER(PID_AUTOTUNE_MENU, PID_EDIT_MENU))
 
 //
 // Advanced Settings > Temperature
@@ -664,7 +664,7 @@ void menu_advanced_settings() {
   #endif
 
   #if DISABLED(NO_VOLUMETRICS) || ENABLED(ADVANCED_PAUSE_FEATURE)
-    MENU_ITEM(submenu, MSG_FILAMENT, menu_advanced_filament);
+    // MENU_ITEM(submenu, MSG_FILAMENT, menu_advanced_filament);
   #elif ENABLED(LIN_ADVANCE)
     #if EXTRUDERS == 1
       MENU_ITEM_EDIT(float52, MSG_ADVANCE_K, &planner.extruder_advance_K[0], 0, 999);

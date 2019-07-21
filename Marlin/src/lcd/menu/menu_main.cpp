@@ -162,7 +162,7 @@ void menu_main() {
     MENU_ITEM(submenu, MSG_CUTTER(MENU), menu_spindle_laser);
   #endif
 
-  MENU_ITEM(submenu, MSG_TEMPERATURE, menu_temperature);
+  //MENU_ITEM(submenu, MSG_TEMPERATURE, menu_temperature);
 
   #if ENABLED(MIXING_EXTRUDER)
     MENU_ITEM(submenu, MSG_MIXER, menu_mixer);
