@@ -77,8 +77,8 @@ static void _lcd_move_xyz(PGM_P name, AxisEnum axis) {
   if (ui.encoderPosition && !ui.processing_manual_move) {
 
     // Start with no limits to movement
-    float min = current_position[axis] - 1000,
-          max = current_position[axis] + 1000;
+    float min = current_position[axis] - 11000,
+          max = current_position[axis] + 11000;
 
     // Limit to software endstops, if enabled
     #if HAS_SOFTWARE_ENDSTOPS
@@ -145,7 +145,7 @@ static void _lcd_move_xyz(PGM_P name, AxisEnum axis) {
         + manual_move_offset
       #endif
     , axis);
-    draw_edit_screen(name, move_menu_scale >= 0.1f ? ftostr41sign(pos) : ftostr43sign(pos));
+    draw_edit_screen(name, move_menu_scale >= 0.1f ? ftostr51sign(pos) : ftostr43sign(pos));
   }
 }
 void lcd_move_x() { _lcd_move_xyz(PSTR(MSG_MOVE_X), X_AXIS); }
