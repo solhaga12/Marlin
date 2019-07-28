@@ -709,7 +709,7 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2[, E3[, E4[, E5]]]]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 400, 400, 200, 200 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 400, 400, 1600, 200 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -792,7 +792,7 @@
  *
  * Enable this option for a probe connected to the Z Min endstop pin.
  */
-#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
+//#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
 
 /**
  * Z_MIN_PROBE_PIN
@@ -1031,8 +1031,8 @@
 // @section machine
 
 // The size of the print bed
-#define X_BED_SIZE 1097
-#define Y_BED_SIZE 593
+#define X_BED_SIZE 1098
+#define Y_BED_SIZE 594
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
@@ -1321,7 +1321,7 @@
 #endif
 
 // Homing speeds (mm/m)
-#define HOMING_FEEDRATE_XY (30*60)
+#define HOMING_FEEDRATE_XY (50*60)
 #define HOMING_FEEDRATE_Z  (3*60)
 
 // Validate that endstops are triggered on homing moves
