@@ -219,6 +219,8 @@ volatile int32_t Stepper::endstops_trigsteps[XYZ];
 volatile int32_t Stepper::count_position[NUM_AXIS] = { 0 };
 int8_t Stepper::count_direction[NUM_AXIS] = { 0, 0, 0, 0 };
 
+bool Stepper::axis_locked[NUM_AXIS] = {false, false, false, false};
+
 #define DUAL_ENDSTOP_APPLY_STEP(A,V)                                                                                        \
   if (separate_multi_axis) {                                                                                                \
     if (A##_HOME_DIR < 0) {                                                                                                 \
@@ -2161,6 +2163,33 @@ void Stepper::init() {
   #endif
 }
 
+
+/**
+ * Block until all buffered steps are executed
+ */
+void Stepper::synchronize()
+{
+  while (planner.has_blocks_queued())
+    idle();
+}
+
+/**
+ * Leave axis pins untouched for external controller to use it
+ */
+void Stepper::leave_control_on(AxisEnum axis)
+{
+  axis_locked[axis] = true;
+}
+
+/**
+ * Take control back on axis pins
+ */
+void Stepper::take_control_on(AxisEnum axis)
+{
+  axis_locked[axis] = false;
+  set_directions();
+}
+
 /**
  * Set the stepper positions directly in steps
  *
@@ -2443,6 +2472,12 @@ void Stepper::report_positions() {
   }
 
 #endif // BABYSTEPPING
+
+
+  void Stepper::shift_z_position(int8_t shift)
+  {
+    count_position[Z_AXIS] += shift;
+  }
 
 /**
  * Software-controlled Stepper Motor Current

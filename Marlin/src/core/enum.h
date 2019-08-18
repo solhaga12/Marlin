@@ -49,6 +49,26 @@ enum AxisEnum : unsigned char {
   NO_AXIS   = 0xFF
 };
 
+/**
+ * Plasma states
+ */
+ enum PlasmaState {
+   Locked,
+   Off,
+   Ignition,
+   Established,
+   Lost
+ };
+
+ /**
+  * THC states
+  */
+  enum THCState {
+    Enabled,
+    Disabled,
+    Disabling
+  };
+
 #if HAS_DRIVER(L6470)
   enum L6470_driver_enum : unsigned char { X, Y, Z, X2, Y2, Z2, Z3, E0, E1, E2, E3, E4, E5 };
 #endif

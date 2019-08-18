@@ -694,6 +694,11 @@ class Planner {
     static void set_e_position_mm(const float &e);
 
     /**
+     * Set the Z position (steps) of the planner
+     */
+    static void set_z_position_step(const long& z);
+
+    /**
      * Set the planner.position and individual stepper positions.
      *
      * The supplied position is in machine space, and no additional

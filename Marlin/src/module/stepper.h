@@ -333,6 +333,11 @@ class Stepper {
     //
     static int8_t count_direction[NUM_AXIS];
 
+    //
+    // When an axis is locked, stepper won't touch it's pins
+    //
+    static bool axis_locked[NUM_AXIS];
+
   public:
 
     //
@@ -367,6 +372,11 @@ class Stepper {
 
     // Report the positions of the steppers, in steps
     static void report_positions();
+
+    //
+    // Shift known Z position without moving stepper
+    //
+    static void shift_z_position(int8_t shift);
 
     // The stepper subsystem goes to sleep when it runs out of things to execute. Call this
     // to notify the subsystem that it is time to go to work.
@@ -462,6 +472,20 @@ class Stepper {
         if (was_enabled) ENABLE_STEPPER_DRIVER_INTERRUPT();
       #endif
     }
+    //
+    // Block until all buffered steps are executed
+    //
+    static void synchronize();
+
+    //
+    // Leave axis pins untouched for external controller to use it
+    //
+    static void leave_control_on(AxisEnum axis);
+
+    //
+    // Take control back on axis pins
+    //
+    static void take_control_on(AxisEnum axis);
 
     // Set direction bits for all steppers
     static void set_directions();

@@ -2187,3 +2187,20 @@
 
 // Allow servo angle to be edited and saved to EEPROM
 //#define EDITABLE_SERVO_ANGLES
+
+//=============================================================================
+//=================================== Plasma ==================================
+//=============================================================================
+
+#define PLASMA_START_PIN  1
+#define PLASMA_TRANSFER_PIN 0
+
+#define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
+#define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
+
+#define PLASMA_TRANSFER_TIMEOUT_MS 1000
+
+#define PLASMA_VOLTAGE_DIVIDER_PLUS_PIN 3   // analog
+#define PLASMA_VOLTAGE_DIVIDER_MINUS_PIN 4  // analog
+
+#define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
