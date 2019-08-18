@@ -127,12 +127,6 @@ void menu_main() {
       if (card_detected) {
         if (!card_open) {
           MENU_ITEM(submenu, MSG_CARD_MENU, menu_sdcard);
-          MENU_ITEM(gcode,
-            #if PIN_EXISTS(SD_DETECT)
-              MSG_CHANGE_SDCARD, PSTR("M21")
-            #else
-              MSG_RELEASE_SDCARD, PSTR("M22")
-            #endif
           );
         }
       }
@@ -161,8 +155,6 @@ void menu_main() {
   #if HAS_CUTTER
     MENU_ITEM(submenu, MSG_CUTTER(MENU), menu_spindle_laser);
   #endif
-
-  //MENU_ITEM(submenu, MSG_TEMPERATURE, menu_temperature);
 
   #if ENABLED(MIXING_EXTRUDER)
     MENU_ITEM(submenu, MSG_MIXER, menu_mixer);
@@ -217,13 +209,6 @@ void menu_main() {
 
     if (card_detected) {
       if (!card_open) {
-        MENU_ITEM(gcode,
-          #if PIN_EXISTS(SD_DETECT)
-            MSG_CHANGE_SDCARD, PSTR("M21")
-          #else
-            MSG_RELEASE_SDCARD, PSTR("M22")
-          #endif
-        );
         MENU_ITEM(submenu, MSG_CARD_MENU, menu_sdcard);
       }
     }
