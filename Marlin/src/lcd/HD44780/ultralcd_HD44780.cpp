@@ -738,33 +738,13 @@ void MarlinUI::draw_status_message(const bool blink) {
 
 void MarlinUI::draw_status_screen() {
 
-  const bool blink = get_blink();
+  //const bool blink = get_blink();
+  const bool blink = true;  // Don't blink when not auto squared
   lcd_moveto(0, 0);
 
-  #if LCD_INFO_SCREEN_STYLE == 0
 
     // ========== Line 1 ==========
-
-    #if LCD_WIDTH < 20
-
-      //
-      // Hotend 0 Temperature
-      //
-      _draw_heater_status(H_E0, -1, blink);
-
-      //
-      // Hotend 1 or Bed Temperature
-      //
-      #if HOTENDS > 1
-        lcd_moveto(8, 0);
-        _draw_heater_status(H_E1, LCD_STR_THERMOMETER[0], blink);
-      #elif HAS_HEATED_BED
-        lcd_moveto(8, 0);
-        _draw_bed_status(blink);
-      #endif
-
-    #else // LCD_WIDTH >= 20
-
+    // Show Voltage and status(Start (start plasma) and Transfer (start machine motion)
       //
       // Hotend 0 Temperature
       //
@@ -773,204 +753,39 @@ void MarlinUI::draw_status_screen() {
       //
       // Hotend 1 or Bed Temperature
       //
-      #if HOTENDS > 1
+ //     #if HOTENDS > 1
         lcd_moveto(10, 0);
         _draw_heater_status(H_E1, LCD_STR_THERMOMETER[0], blink);
-      #elif HAS_HEATED_BED
-        lcd_moveto(10, 0);
-        _draw_bed_status(blink);
-      #endif
 
-    #endif // LCD_WIDTH >= 20
+
 
     // ========== Line 2 ==========
 
-    #if LCD_HEIGHT > 2
+  lcd_moveto(0, 1);
 
-      #if LCD_WIDTH < 20
-
-        #if HAS_PRINT_PROGRESS
-          lcd_moveto(0, 2);
-          _draw_print_progress();
-        #endif
-
-      #else // LCD_WIDTH >= 20
-
-        lcd_moveto(0, 1);
-
-        // If the first line has two extruder temps,
-        // show more temperatures on the next line
-
-        #if HOTENDS > 2 || (HOTENDS > 1 && HAS_HEATED_BED)
-
-          #if HOTENDS > 2
-            _draw_heater_status(H_E2, LCD_STR_THERMOMETER[0], blink);
-            lcd_moveto(10, 1);
-          #endif
-
-          _draw_bed_status(blink);
-
-        #else // HOTENDS <= 2 && (HOTENDS <= 1 || !HAS_HEATED_BED)
-
-          #if DUAL_MIXING_EXTRUDER
-
-            // Two-component mix / gradient instead of XY
-
-            char mixer_messages[12];
-            const char *mix_label;
-            #if ENABLED(GRADIENT_MIX)
-              if (mixer.gradient.enabled) {
-                mixer.update_mix_from_gradient();
-                mix_label = "Gr";
-              }
-              else
-            #endif
-              {
-                mixer.update_mix_from_vtool();
-                mix_label = "Mx";
-              }
-            sprintf_P(mixer_messages, PSTR("%s %d;%d%% "), mix_label, int(mixer.mix[0]), int(mixer.mix[1]));
-            lcd_put_u8str(mixer_messages);
-
-          #else
-
-            _draw_axis_value(X_AXIS, ftostr4sign(LOGICAL_X_POSITION(current_position[X_AXIS])), blink);
-
-            lcd_put_wchar(' ');
-
-            _draw_axis_value(Y_AXIS, ftostr4sign(LOGICAL_Y_POSITION(current_position[Y_AXIS])), blink);
-
-          #endif
-
-        #endif // HOTENDS <= 2 && (HOTENDS <= 1 || !HAS_HEATED_BED)
-
-      #endif // LCD_WIDTH >= 20
-
-      lcd_moveto(LCD_WIDTH - 8, 1);
-      _draw_axis_value(Z_AXIS, ftostr52sp(LOGICAL_Z_POSITION(current_position[Z_AXIS])), blink);
-
-      #if HAS_LEVELING && !HAS_HEATED_BED
-        lcd_put_wchar(planner.leveling_active || blink ? '_' : ' ');
-      #endif
-
-    #endif // LCD_HEIGHT > 2
+  _draw_axis_value(X_AXIS, ftostr4sign(LOGICAL_X_POSITION(current_position[X_AXIS])), blink);
+  lcd_put_wchar(' ');
+  _draw_axis_value(Y_AXIS, ftostr4sign(LOGICAL_Y_POSITION(current_position[Y_AXIS])), blink);
+  lcd_moveto(LCD_WIDTH - 8, 1);
+  _draw_axis_value(Z_AXIS, ftostr52sp(LOGICAL_Z_POSITION(current_position[Z_AXIS])), blink);
 
     // ========== Line 3 ==========
 
-    #if LCD_HEIGHT > 3
+  lcd_moveto(0, 2);
+  lcd_put_wchar(LCD_STR_FEEDRATE[0]);
+  lcd_put_u8str(i16tostr3(feedrate_percentage));
+  lcd_put_wchar('%');
 
-      lcd_moveto(0, 2);
-      lcd_put_wchar(LCD_STR_FEEDRATE[0]);
-      lcd_put_u8str(i16tostr3(feedrate_percentage));
-      lcd_put_wchar('%');
-
-      char buffer[14];
-      duration_t elapsed = print_job_timer.duration();
-      const uint8_t len = elapsed.toDigital(buffer),
+  char buffer[14];
+  duration_t elapsed = print_job_timer.duration();
+  const uint8_t len = elapsed.toDigital(buffer),
                     timepos = LCD_WIDTH - len - 1;
-      lcd_moveto(timepos, 2);
-      lcd_put_wchar(LCD_STR_CLOCK[0]);
-      lcd_put_u8str(buffer);
+  lcd_moveto(timepos, 2);
+  lcd_put_wchar(LCD_STR_CLOCK[0]);
+  lcd_put_u8str(buffer);
 
-      #if LCD_WIDTH >= 20
-        lcd_moveto(timepos - 7, 2);
-        #if HAS_PRINT_PROGRESS
-          _draw_print_progress();
-        #else
-          char c;
-          uint16_t per;
-          #if HAS_FAN0
-            if (blink || thermalManager.fan_speed_scaler[0] < 128) {
-              uint16_t spd = thermalManager.fan_speed[0];
-              if (blink) c = 'F';
-              #if ENABLED(ADAPTIVE_FAN_SLOWING)
-                else { c = '*'; spd = thermalManager.scaledFanSpeed(0, spd); }
-              #endif
-              per = thermalManager.fanPercent(spd);
-            }
-            else
-          #endif
-            {
-              c = 'E';
-              per = planner.flow_percentage[0];
-            }
-          lcd_put_wchar(c);
-          lcd_put_u8str(i16tostr3(per));
-          lcd_put_wchar('%');
-        #endif
-      #endif
 
-    #endif // LCD_HEIGHT > 3
-
-  #elif LCD_INFO_SCREEN_STYLE == 1
-
-    // ========== Line 1 ==========
-
-    //
-    // Hotend 0 Temperature
-    //
-    _draw_heater_status(H_E0, LCD_STR_THERMOMETER[0], blink);
-
-    //
-    // Z Coordinate
-    //
-    lcd_moveto(LCD_WIDTH - 9, 0);
-    _draw_axis_value(Z_AXIS, ftostr52sp(LOGICAL_Z_POSITION(current_position[Z_AXIS])), blink);
-
-    #if HAS_LEVELING && (HOTENDS > 1 || !HAS_HEATED_BED)
-      lcd_moveto(LCD_WIDTH - 1, 0);
-      lcd_put_wchar(planner.leveling_active || blink ? '_' : ' ');
-    #endif
-
-    // ========== Line 2 ==========
-
-    //
-    // Hotend 1 or Bed Temperature
-    //
-    lcd_moveto(0, 1);
-    #if HOTENDS > 1
-      _draw_heater_status(H_E1, LCD_STR_THERMOMETER[0], blink);
-    #elif HAS_HEATED_BED
-      _draw_bed_status(blink);
-    #endif
-
-    lcd_moveto(LCD_WIDTH - 9, 1);
-    lcd_put_wchar(LCD_STR_FEEDRATE[0]);
-    lcd_put_u8str(i16tostr3(feedrate_percentage));
-    lcd_put_wchar('%');
-
-    // ========== Line 3 ==========
-
-    //
-    // SD Percent, Hotend 2, or Bed
-    //
-    lcd_moveto(0, 2);
-    #if HOTENDS > 2
-      _draw_heater_status(H_E2, LCD_STR_THERMOMETER[0], blink);
-    #elif HOTENDS > 1 && HAS_HEATED_BED
-      _draw_bed_status(blink);
-    #elif HAS_PRINT_PROGRESS
-      #define DREW_PRINT_PROGRESS
-      _draw_print_progress();
-    #endif
-
-    //
-    // Elapsed Time or SD Percent
-    //
-    lcd_moveto(LCD_WIDTH - 9, 2);
-    #if HAS_PRINT_PROGRESS && !defined(DREW_PRINT_PROGRESS)
-      _draw_print_progress();
-    #else
-      duration_t elapsed = print_job_timer.duration();
-      char buffer[14];
-      (void)elapsed.toDigital(buffer);
-      lcd_put_wchar(LCD_STR_CLOCK[0]);
-      lcd_put_u8str(buffer);
-    #endif
-
-  #endif // LCD_INFO_SCREEN_STYLE 1
-
-  // ========= Last Line ========
+  // ========= Line 4 ========
 
   //
   // Status Message (which may be a Progress Bar or Filament display)
