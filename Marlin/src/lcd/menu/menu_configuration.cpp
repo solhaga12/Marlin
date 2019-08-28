@@ -287,7 +287,7 @@ static void lcd_factory_settings() {
 #endif
 
 #if DISABLED(SLIM_LCD_MENUS)
-
+/*
   void _menu_configuration_preheat_settings(const uint8_t material) {
     #if HOTENDS > 5
       #define MINTEMP_ALL _MIN(HEATER_0_MINTEMP, HEATER_1_MINTEMP, HEATER_2_MINTEMP, HEATER_3_MINTEMP, HEATER_4_MINTEMP, HEATER_5_MINTEMP)
@@ -325,7 +325,7 @@ static void lcd_factory_settings() {
 
   void menu_preheat_material1_settings() { _menu_configuration_preheat_settings(0); }
   void menu_preheat_material2_settings() { _menu_configuration_preheat_settings(1); }
-
+*/
 #endif
 
 void menu_configuration() {

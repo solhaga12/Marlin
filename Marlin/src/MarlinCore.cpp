@@ -830,6 +830,7 @@ void stop() {
  */
 void setup() {
 
+
   HAL_init();
 
   #if HAS_DRIVER(L6470)

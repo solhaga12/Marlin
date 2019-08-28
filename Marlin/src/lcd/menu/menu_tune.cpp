@@ -142,6 +142,7 @@ void menu_tune() {
   // Nozzle:
   // Nozzle [1-4]:
   //
+ /*
   #if HOTENDS == 1
     MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_NOZZLE, &thermalManager.temp_hotend[0].target, 0, HEATER_0_MAXTEMP - 15, thermalManager.start_watching_E0);
   #else // HOTENDS > 1
@@ -165,10 +166,11 @@ void menu_tune() {
   #if ENABLED(SINGLENOZZLE)
     MENU_MULTIPLIER_ITEM_EDIT(uint16_3, MSG_NOZZLE_STANDBY, &singlenozzle_temp[active_extruder ? 0 : 1], 0, HEATER_0_MAXTEMP - 15);
   #endif
-
+*/
   //
   // Bed:
   //
+    /*
   #if HAS_HEATED_BED
     MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(int3, MSG_BED, &thermalManager.temp_bed.target, 0, BED_MAXTEMP - 10, thermalManager.start_watching_bed);
   #endif
@@ -196,6 +198,7 @@ void menu_tune() {
       #endif
     #endif
   #endif // FAN_COUNT > 0
+  */
 
   //
   // Flow:

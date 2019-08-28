@@ -43,3 +43,5 @@ void GcodeSuite::M300() {
 }
 
 #endif // HAS_BUZZER
+
+void GcodeSuite::M145() {} // Dummy to keep the linker happy (LiquidCrystal)

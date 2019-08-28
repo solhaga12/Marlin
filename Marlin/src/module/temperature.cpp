@@ -1657,6 +1657,12 @@ void Temperature::init() {
 
   HAL_adc_init();
 
+  analogReference(INTERNAL1V1);
+  analogRead(0);
+
+  HAL_ANALOG_SELECT(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN);
+  HAL_ANALOG_SELECT(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN);
+/*
   #if HAS_TEMP_ADC_0
     HAL_ANALOG_SELECT(TEMP_0_PIN);
   #endif
@@ -1687,31 +1693,9 @@ void Temperature::init() {
   #if HAS_ADC_BUTTONS
     HAL_ANALOG_SELECT(ADC_KEYPAD_PIN);
   #endif
-
+*/
   HAL_timer_start(TEMP_TIMER_NUM, TEMP_TIMER_FREQUENCY);
   ENABLE_TEMPERATURE_INTERRUPT();
-
-  #if HAS_AUTO_FAN_0
-    INIT_E_AUTO_FAN_PIN(E0_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_FAN_1 && !AUTO_1_IS_0
-    INIT_E_AUTO_FAN_PIN(E1_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_FAN_2 && !(AUTO_2_IS_0 || AUTO_2_IS_1)
-    INIT_E_AUTO_FAN_PIN(E2_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_FAN_3 && !(AUTO_3_IS_0 || AUTO_3_IS_1 || AUTO_3_IS_2)
-    INIT_E_AUTO_FAN_PIN(E3_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_FAN_4 && !(AUTO_4_IS_0 || AUTO_4_IS_1 || AUTO_4_IS_2 || AUTO_4_IS_3)
-    INIT_E_AUTO_FAN_PIN(E4_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_FAN_5 && !(AUTO_5_IS_0 || AUTO_5_IS_1 || AUTO_5_IS_2 || AUTO_5_IS_3 || AUTO_5_IS_4)
-    INIT_E_AUTO_FAN_PIN(E5_AUTO_FAN_PIN);
-  #endif
-  #if HAS_AUTO_CHAMBER_FAN && !AUTO_CHAMBER_IS_E
-    INIT_CHAMBER_AUTO_FAN_PIN(CHAMBER_AUTO_FAN_PIN);
-  #endif
 
   // Wait for temperature measurement to settle
   delay(250);
@@ -2669,7 +2653,7 @@ void Temperature::isr() {
 
     #if HAS_TEMP_ADC_0
       case PrepareTemp_0:
-        HAL_START_ADC(TEMP_0_PIN);
+        HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN);
         break;
       case MeasureTemp_0:
         ACCUMULATE_ADC(temp_hotend[0]);
@@ -2678,105 +2662,13 @@ void Temperature::isr() {
 
     #if HAS_HEATED_BED
       case PrepareTemp_BED:
-        HAL_START_ADC(TEMP_BED_PIN);
+        HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN);
         break;
       case MeasureTemp_BED:
         ACCUMULATE_ADC(temp_bed);
         break;
     #endif
 
-    #if HAS_TEMP_CHAMBER
-      case PrepareTemp_CHAMBER:
-        HAL_START_ADC(TEMP_CHAMBER_PIN);
-        break;
-      case MeasureTemp_CHAMBER:
-        ACCUMULATE_ADC(temp_chamber);
-        break;
-    #endif
-
-    #if HAS_TEMP_ADC_1
-      case PrepareTemp_1:
-        HAL_START_ADC(TEMP_1_PIN);
-        break;
-      case MeasureTemp_1:
-        ACCUMULATE_ADC(temp_hotend[1]);
-        break;
-    #endif
-
-    #if HAS_TEMP_ADC_2
-      case PrepareTemp_2:
-        HAL_START_ADC(TEMP_2_PIN);
-        break;
-      case MeasureTemp_2:
-        ACCUMULATE_ADC(temp_hotend[2]);
-        break;
-    #endif
-
-    #if HAS_TEMP_ADC_3
-      case PrepareTemp_3:
-        HAL_START_ADC(TEMP_3_PIN);
-        break;
-      case MeasureTemp_3:
-        ACCUMULATE_ADC(temp_hotend[3]);
-        break;
-    #endif
-
-    #if HAS_TEMP_ADC_4
-      case PrepareTemp_4:
-        HAL_START_ADC(TEMP_4_PIN);
-        break;
-      case MeasureTemp_4:
-        ACCUMULATE_ADC(temp_hotend[4]);
-        break;
-    #endif
-
-    #if HAS_TEMP_ADC_5
-      case PrepareTemp_5:
-        HAL_START_ADC(TEMP_5_PIN);
-        break;
-      case MeasureTemp_5:
-        ACCUMULATE_ADC(temp_hotend[5]);
-        break;
-    #endif
-
-    #if ENABLED(FILAMENT_WIDTH_SENSOR)
-      case Prepare_FILWIDTH:
-        HAL_START_ADC(FILWIDTH_PIN);
-      break;
-      case Measure_FILWIDTH:
-        if (!HAL_ADC_READY())
-          next_sensor_state = adc_sensor_state; // redo this state
-        else if (HAL_READ_ADC() > 102) { // Make sure ADC is reading > 0.5 volts, otherwise don't read.
-          raw_filwidth_value -= raw_filwidth_value >> 7; // Subtract 1/128th of the raw_filwidth_value
-          raw_filwidth_value += uint32_t(HAL_READ_ADC()) << 7; // Add new ADC reading, scaled by 128
-        }
-      break;
-    #endif
-
-    #if HAS_ADC_BUTTONS
-      case Prepare_ADC_KEY:
-        HAL_START_ADC(ADC_KEYPAD_PIN);
-        break;
-      case Measure_ADC_KEY:
-        if (!HAL_ADC_READY())
-          next_sensor_state = adc_sensor_state; // redo this state
-        else if (ADCKey_count < 16) {
-          raw_ADCKey_value = HAL_READ_ADC();
-          if (raw_ADCKey_value <= 900) {
-            NOMORE(current_ADCKey_raw, raw_ADCKey_value);
-            ADCKey_count++;
-          }
-          else { //ADC Key release
-            if (ADCKey_count > 0) ADCKey_count++; else ADCKey_pressed = false;
-            if (ADCKey_pressed) {
-              ADCKey_count = 0;
-              current_ADCKey_raw = 1024;
-            }
-          }
-        }
-        if (ADCKey_count == 16) ADCKey_pressed = true;
-        break;
-    #endif // ADC_KEYPAD
 
     case StartupDelay: break;
 

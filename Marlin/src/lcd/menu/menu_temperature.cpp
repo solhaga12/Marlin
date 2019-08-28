@@ -46,7 +46,7 @@ uint8_t MarlinUI::preheat_fan_speed[2];
 //
 // "Temperature" submenu items
 //
-
+/*
 void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb, const uint8_t fan) {
   if (temph > 0) thermalManager.setTargetHotend(_MIN(heater_maxtemp[endnum] - 15, temph), endnum);
   #if HAS_HEATED_BED
@@ -65,7 +65,8 @@ void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb
   #endif
   ui.return_to_status();
 }
-
+*/
+/*
 #if HOTENDS > 1
 
   void lcd_preheat_m1_e1_only() { _lcd_preheat(1, ui.preheat_hotend_temp[0], -1, ui.preheat_fan_speed[0]); }
@@ -106,7 +107,8 @@ void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb
       #endif // HOTENDS > 4
     #endif // HOTENDS > 3
   #endif // HOTENDS > 2
-
+*/
+/*
   #if HAS_HEATED_BED
     void lcd_preheat_m1_e0();
     void lcd_preheat_m2_e0();
@@ -114,7 +116,8 @@ void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb
     void lcd_preheat_m1_e0_only();
     void lcd_preheat_m2_e0_only();
   #endif
-
+*/
+/*
   void lcd_preheat_m1_all() {
     #if HOTENDS > 1
       thermalManager.setTargetHotend(ui.preheat_hotend_temp[0], 1);
@@ -162,7 +165,8 @@ void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb
   }
 
 #endif // HOTENDS > 1
-
+*/
+/*
 #if HAS_TEMP_HOTEND || HAS_HEATED_BED
 
   void lcd_preheat_m1_e0_only() { _lcd_preheat(0, ui.preheat_hotend_temp[0], -1, ui.preheat_fan_speed[0]); }
@@ -302,7 +306,8 @@ void _lcd_preheat(const int16_t endnum, const int16_t temph, const int16_t tempb
   }
 
 #endif // HAS_TEMP_HOTEND || HAS_HEATED_BED
-
+*/
+/*
 void menu_temperature() {
   START_MENU();
   MENU_BACK(MSG_MAIN);
@@ -400,5 +405,6 @@ void menu_temperature() {
 
   END_MENU();
 }
+*/
 
 #endif // HAS_LCD_MENU

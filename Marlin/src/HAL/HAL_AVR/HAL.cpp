@@ -36,6 +36,10 @@
 // ------------------------
 
 void HAL_init(void) {
+
+  analogReference(INTERNAL1V1);
+  analogRead(0);
+
   // Init Servo Pins
   #define INIT_SERVO(N) OUT_WRITE(SERVO##N##_PIN, LOW)
   #if HAS_SERVO_0
