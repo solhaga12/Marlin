@@ -744,18 +744,14 @@ void MarlinUI::draw_status_screen() {
 
 
     // ========== Line 1 ==========
-    // Show Status(Start (start plasma) and Transfer (start machine motion)
+    // Show Status(Off, Start (start plasma) and Transfer (start machine motion)
   lcd_put_u8str("Status");
 
-      // Show Voltage divider current/set (from gcode)
-      //
-      // Hotend 1 or Bed Temperature
-      //
- //     #if HOTENDS > 1
+  // Show current/set Divider Voltage
   lcd_moveto(10, 0);
-  lcd_put_u8str("126");
+  lcd_put_u8str(ui16tostr4(analogRead(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN)));
   lcd_put_wchar('/');
-  lcd_put_u8str("130");
+  lcd_put_u8str(ui16tostr4(analogRead(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN)));
 
     // ========== Line 2 ==========
 
