@@ -29,7 +29,7 @@
 #include "DGUSDisplayDefinition.h"
 #include "DGUSDisplay.h"
 
-#include "../../../../module/temperature.h"
+#include "../../../../module/voltages.h"
 #include "../../../../module/motion.h"
 
 #include "../../../ultralcd.h"

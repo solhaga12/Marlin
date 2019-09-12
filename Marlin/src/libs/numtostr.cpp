@@ -138,7 +138,7 @@ char* i16tostr4sign(const int16_t i) {
 char* ftostr12ns(const float &f) {
   const long i = ((f < 0 ? -f : f) * 1000 + 5) / 10;
   conv[3] = DIGIMOD(i, 100);
-  conv[4] = '.';
+  conv[4] = ',';
   conv[5] = DIGIMOD(i, 10);
   conv[6] = DIGIMOD(i, 1);
   return &conv[3];

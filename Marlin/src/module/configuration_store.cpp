@@ -49,7 +49,6 @@
 #include "endstops.h"
 #include "planner.h"
 #include "stepper.h"
-#include "temperature.h"
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
 #include "../libs/vector_3.h"
@@ -94,19 +93,10 @@
   #include "../feature/backlash.h"
 #endif
 
-#if HAS_FILAMENT_SENSOR
-  #include "../feature/runout.h"
-#endif
-
 #include "../lcd/extensible_ui/ui_api.h"
 
 #if ENABLED(EXTRA_LIN_ADVANCE_K)
 extern float saved_extruder_advance_K[EXTRUDERS];
-#endif
-
-#if EXTRUDERS > 1
-  #include "tool_change.h"
-  void M217_report(const bool eeprom);
 #endif
 
 #if ENABLED(BLTOUCH)
@@ -234,31 +224,6 @@ typedef struct SettingsDataStruct {
   #endif
 
   //
-  // ULTIPANEL
-  //
-  int16_t ui_preheat_hotend_temp[2],                    // M145 S0 H
-          ui_preheat_bed_temp[2];                       // M145 S0 B
-  uint8_t ui_preheat_fan_speed[2];                      // M145 S0 F
-
-  //
-  // PIDTEMP
-  //
-  PIDC_t hotendPID[HOTENDS];                            // M301 En PIDC / M303 En U
-  int16_t lpq_len;                                      // M301 L
-
-  //
-  // PIDTEMPBED
-  //
-  PID_t bedPID;                                         // M304 PID / M303 E-1 U
-
-  //
-  // User-defined Thermistors
-  //
-  #if HAS_USER_THERMISTORS
-    user_thermistor_t user_thermistor[USER_THERMISTORS]; // M305 P0 R4700 T100000 B3950
-  #endif
-
-  //
   // HAS_LCD_CONTRAST
   //
   int16_t lcd_contrast;                                 // M250 C
@@ -356,49 +321,6 @@ void MarlinSettings::postprocess() {
 
   // steps per s2 needs to be updated to agree with units per s2
   planner.reset_acceleration_rates();
-
-  // Make sure delta kinematics are updated before refreshing the
-  // planner position so the stepper counts will be set correctly.
-  #if ENABLED(DELTA)
-    recalc_delta_settings();
-  #endif
-
-  #if ENABLED(PIDTEMP)
-    thermalManager.updatePID();
-  #endif
-
-  #if DISABLED(NO_VOLUMETRICS)
-    planner.calculate_volumetric_multipliers();
-  #else
-    for (uint8_t i = COUNT(planner.e_factor); i--;)
-      planner.refresh_e_factor(i);
-  #endif
-
-  // Software endstops depend on home_offset
-  LOOP_XYZ(i) {
-    update_workspace_offset((AxisEnum)i);
-    update_software_endstops((AxisEnum)i);
-  }
-
-  #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-    set_z_fade_height(new_z_fade_height, false); // false = no report
-  #endif
-
-  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-    refresh_bed_level();
-  #endif
-
-  #if HAS_MOTOR_CURRENT_PWM
-    stepper.refresh_motor_power();
-  #endif
-
-  #if ENABLED(FWRETRACT)
-    fwretract.refresh_autoretract();
-  #endif
-
-  #if BOTH(JUNCTION_DEVIATION, LIN_ADVANCE)
-    planner.recalculate_max_e_jerk();
-  #endif
 
   // Refresh steps_to_mm with the reciprocal of axis_steps_per_mm
   // and init stepper.count[], planner.position[] with current_position
@@ -772,72 +694,6 @@ void MarlinSettings::postprocess() {
     }
 
     //
-    // LCD Preheat settings
-    //
-    {
-      _FIELD_TEST(ui_preheat_hotend_temp);
-
-      #if HAS_LCD_MENU
-        const int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
-                      (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
-        const uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
-      #else
-        constexpr int16_t ui_preheat_hotend_temp[2] = { PREHEAT_1_TEMP_HOTEND, PREHEAT_2_TEMP_HOTEND },
-                          ui_preheat_bed_temp[2]    = { PREHEAT_1_TEMP_BED, PREHEAT_2_TEMP_BED };
-        constexpr uint8_t ui_preheat_fan_speed[2]   = { PREHEAT_1_FAN_SPEED, PREHEAT_2_FAN_SPEED };
-      #endif
-
-      EEPROM_WRITE(ui_preheat_hotend_temp);
-      EEPROM_WRITE(ui_preheat_bed_temp);
-      EEPROM_WRITE(ui_preheat_fan_speed);
-    }
-
-    //
-    // PIDTEMP
-    //
-    {
-      _FIELD_TEST(hotendPID);
-      HOTEND_LOOP() {
-        PIDC_t pidc = {
-          PID_PARAM(Kp, e), PID_PARAM(Ki, e), PID_PARAM(Kd, e), PID_PARAM(Kc, e)
-        };
-        EEPROM_WRITE(pidc);
-      }
-
-      _FIELD_TEST(lpq_len);
-      #if ENABLED(PID_EXTRUSION_SCALING)
-        EEPROM_WRITE(thermalManager.lpq_len);
-      #else
-        const int16_t lpq_len = 20;
-        EEPROM_WRITE(lpq_len);
-      #endif
-    }
-
-    //
-    // PIDTEMPBED
-    //
-    {
-      _FIELD_TEST(bedPID);
-
-      #if DISABLED(PIDTEMPBED)
-        const PID_t bed_pid = { DUMMY_PID_VALUE, DUMMY_PID_VALUE, DUMMY_PID_VALUE };
-        EEPROM_WRITE(bed_pid);
-      #else
-        EEPROM_WRITE(thermalManager.temp_bed.pid);
-      #endif
-    }
-
-    //
-    // User-defined Thermistors
-    //
-    #if HAS_USER_THERMISTORS
-    {
-      _FIELD_TEST(user_thermistor);
-      EEPROM_WRITE(thermalManager.user_thermistor);
-    }
-    #endif
-
-    //
     // LCD Contrast
     //
     {
@@ -851,22 +707,6 @@ void MarlinSettings::postprocess() {
         #endif
       ;
       EEPROM_WRITE(lcd_contrast);
-    }
-
-    //
-    // Power-Loss Recovery
-    //
-    {
-      _FIELD_TEST(recovery_enabled);
-
-      const bool recovery_enabled =
-        #if ENABLED(POWER_LOSS_RECOVERY)
-          recovery.enabled
-        #else
-          true
-        #endif
-      ;
-      EEPROM_WRITE(recovery_enabled);
     }
 
     //
@@ -886,27 +726,6 @@ void MarlinSettings::postprocess() {
       #else
         const bool autoretract_enabled = false;
         EEPROM_WRITE(autoretract_enabled);
-      #endif
-    }
-
-    //
-    // Volumetric & Filament Size
-    //
-    {
-      _FIELD_TEST(parser_volumetric_enabled);
-
-      #if DISABLED(NO_VOLUMETRICS)
-
-        EEPROM_WRITE(parser.volumetric_enabled);
-        EEPROM_WRITE(planner.filament_size);
-
-      #else
-
-        const bool volumetric_enabled = false;
-        dummy = DEFAULT_NOMINAL_FILAMENT_DIA;
-        EEPROM_WRITE(volumetric_enabled);
-        for (uint8_t q = EXTRUDERS; q--;) EEPROM_WRITE(dummy);
-
       #endif
     }
 
@@ -1568,81 +1387,6 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // LCD Preheat settings
-      //
-      {
-        _FIELD_TEST(ui_preheat_hotend_temp);
-
-        #if HAS_LCD_MENU
-          int16_t (&ui_preheat_hotend_temp)[2]  = ui.preheat_hotend_temp,
-                  (&ui_preheat_bed_temp)[2]     = ui.preheat_bed_temp;
-          uint8_t (&ui_preheat_fan_speed)[2]    = ui.preheat_fan_speed;
-        #else
-          int16_t ui_preheat_hotend_temp[2], ui_preheat_bed_temp[2];
-          uint8_t ui_preheat_fan_speed[2];
-        #endif
-        EEPROM_READ(ui_preheat_hotend_temp); // 2 floats
-        EEPROM_READ(ui_preheat_bed_temp);    // 2 floats
-        EEPROM_READ(ui_preheat_fan_speed);   // 2 floats
-      }
-
-      //
-      // Hotend PID
-      //
-      {
-        HOTEND_LOOP() {
-          PIDC_t pidc;
-          EEPROM_READ(pidc);
-          #if ENABLED(PIDTEMP)
-            if (!validating && pidc.Kp != DUMMY_PID_VALUE) {
-              // No need to scale PID values since EEPROM values are scaled
-              PID_PARAM(Kp, e) = pidc.Kp;
-              PID_PARAM(Ki, e) = pidc.Ki;
-              PID_PARAM(Kd, e) = pidc.Kd;
-              #if ENABLED(PID_EXTRUSION_SCALING)
-                PID_PARAM(Kc, e) = pidc.Kc;
-              #endif
-            }
-          #endif
-        }
-      }
-
-      //
-      // PID Extrusion Scaling
-      //
-      {
-        _FIELD_TEST(lpq_len);
-        #if ENABLED(PID_EXTRUSION_SCALING)
-          EEPROM_READ(thermalManager.lpq_len);
-        #else
-          int16_t lpq_len;
-          EEPROM_READ(lpq_len);
-        #endif
-      }
-
-      //
-      // Heated Bed PID
-      //
-      {
-        PID_t pid;
-        EEPROM_READ(pid);
-        #if ENABLED(PIDTEMPBED)
-          if (!validating && pid.Kp != DUMMY_PID_VALUE)
-            memcpy(&thermalManager.temp_bed.pid, &pid, sizeof(pid));
-        #endif
-      }
-
-      //
-      // User-defined Thermistors
-      //
-      #if HAS_USER_THERMISTORS
-      {
-        _FIELD_TEST(user_thermistor);
-        EEPROM_READ(thermalManager.user_thermistor);
-      }
-      #endif
-
-      //
       // LCD Contrast
       //
       {
@@ -1652,20 +1396,6 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(lcd_contrast);
         #if HAS_LCD_CONTRAST
           ui.set_contrast(lcd_contrast);
-        #endif
-      }
-
-      //
-      // Power-Loss Recovery
-      //
-      {
-        _FIELD_TEST(recovery_enabled);
-
-        #if ENABLED(POWER_LOSS_RECOVERY)
-          EEPROM_READ(recovery.enabled);
-        #else
-          bool recovery_enabled;
-          EEPROM_READ(recovery_enabled);
         #endif
       }
 
@@ -2417,59 +2147,6 @@ void MarlinSettings::reset() {
 
   #endif
 
-  //
-  // Preheat parameters
-  //
-
-  #if HAS_LCD_MENU
-    ui.preheat_hotend_temp[0] = PREHEAT_1_TEMP_HOTEND;
-    ui.preheat_hotend_temp[1] = PREHEAT_2_TEMP_HOTEND;
-    ui.preheat_bed_temp[0] = PREHEAT_1_TEMP_BED;
-    ui.preheat_bed_temp[1] = PREHEAT_2_TEMP_BED;
-    ui.preheat_fan_speed[0] = PREHEAT_1_FAN_SPEED;
-    ui.preheat_fan_speed[1] = PREHEAT_2_FAN_SPEED;
-  #endif
-
-  //
-  // Hotend PID
-  //
-
-  #if ENABLED(PIDTEMP)
-    HOTEND_LOOP() {
-      PID_PARAM(Kp, e) = float(DEFAULT_Kp);
-      PID_PARAM(Ki, e) = scalePID_i(DEFAULT_Ki);
-      PID_PARAM(Kd, e) = scalePID_d(DEFAULT_Kd);
-      #if ENABLED(PID_EXTRUSION_SCALING)
-        PID_PARAM(Kc, e) = DEFAULT_Kc;
-      #endif
-    }
-  #endif
-
-  //
-  // PID Extrusion Scaling
-  //
-
-  #if ENABLED(PID_EXTRUSION_SCALING)
-    thermalManager.lpq_len = 20;  // Default last-position-queue size
-  #endif
-
-  //
-  // Heated Bed PID
-  //
-
-  #if ENABLED(PIDTEMPBED)
-    thermalManager.temp_bed.pid.Kp = DEFAULT_bedKp;
-    thermalManager.temp_bed.pid.Ki = scalePID_i(DEFAULT_bedKi);
-    thermalManager.temp_bed.pid.Kd = scalePID_d(DEFAULT_bedKd);
-  #endif
-
-  //
-  // User-Defined Thermistors
-  //
-
-  #if HAS_USER_THERMISTORS
-    thermalManager.reset_user_thermistors();
-  #endif
 
   //
   // LCD Contrast
@@ -2477,14 +2154,6 @@ void MarlinSettings::reset() {
 
   #if HAS_LCD_CONTRAST
     ui.set_contrast(DEFAULT_LCD_CONTRAST);
-  #endif
-
-  //
-  // Power-Loss Recovery
-  //
-
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    recovery.enable(true);
   #endif
 
   //
@@ -2627,8 +2296,6 @@ void MarlinSettings::reset() {
     if (colon) SERIAL_ECHOLNPGM(":");
   }
 
-  void report_M92(const bool echo=true, const int8_t e=-1);
-
   /**
    * M503 - Report current settings in RAM
    *
@@ -2650,68 +2317,7 @@ void MarlinSettings::reset() {
     #endif
     SERIAL_EOL();
 
-    #if HAS_LCD_MENU
-
-      // Temperature units - for Ultipanel temperature options
-
-      CONFIG_ECHO_START();
-      #if ENABLED(TEMPERATURE_UNITS_SUPPORT)
-        SERIAL_ECHOPGM("  M149 ");
-        SERIAL_CHAR(parser.temp_units_code());
-        SERIAL_ECHOPGM(" ; Units in ");
-        serialprintPGM(parser.temp_units_name());
-      #else
-        SERIAL_ECHOLNPGM("  M149 C ; Units in Celsius");
-      #endif
-
-    #endif
-
-    SERIAL_EOL();
-
-    #if DISABLED(NO_VOLUMETRICS)
-
-      /**
-       * Volumetric extrusion M200
-       */
-      if (!forReplay) {
-        CONFIG_ECHO_START();
-        SERIAL_ECHOPGM("Filament settings:");
-        if (parser.volumetric_enabled)
-          SERIAL_EOL();
-        else
-          SERIAL_ECHOLNPGM(" Disabled");
-      }
-
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR("  M200 D", LINEAR_UNIT(planner.filament_size[0]));
-      #if EXTRUDERS > 1
-        CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR("  M200 T1 D", LINEAR_UNIT(planner.filament_size[1]));
-        #if EXTRUDERS > 2
-          CONFIG_ECHO_START();
-          SERIAL_ECHOLNPAIR("  M200 T2 D", LINEAR_UNIT(planner.filament_size[2]));
-          #if EXTRUDERS > 3
-            CONFIG_ECHO_START();
-            SERIAL_ECHOLNPAIR("  M200 T3 D", LINEAR_UNIT(planner.filament_size[3]));
-            #if EXTRUDERS > 4
-              CONFIG_ECHO_START();
-              SERIAL_ECHOLNPAIR("  M200 T4 D", LINEAR_UNIT(planner.filament_size[4]));
-              #if EXTRUDERS > 5
-                CONFIG_ECHO_START();
-                SERIAL_ECHOLNPAIR("  M200 T5 D", LINEAR_UNIT(planner.filament_size[5]));
-              #endif // EXTRUDERS > 5
-            #endif // EXTRUDERS > 4
-          #endif // EXTRUDERS > 3
-        #endif // EXTRUDERS > 2
-      #endif // EXTRUDERS > 1
-
-      if (!parser.volumetric_enabled)
-        CONFIG_ECHO_MSG("  M200 D0");
-
-    #endif // !NO_VOLUMETRICS
-
     CONFIG_ECHO_HEADING("Steps per unit:");
-    report_M92(!forReplay);
 
     CONFIG_ECHO_HEADING("Maximum feedrates (units/s):");
     CONFIG_ECHO_START();
@@ -2972,75 +2578,6 @@ void MarlinSettings::reset() {
 
     #endif // [XYZ]_DUAL_ENDSTOPS
 
-    #if HAS_LCD_MENU
-
-      CONFIG_ECHO_HEADING("Material heatup parameters:");
-      for (uint8_t i = 0; i < COUNT(ui.preheat_hotend_temp); i++) {
-        CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR(
-            "  M145 S", (int)i
-          , " H", TEMP_UNIT(ui.preheat_hotend_temp[i])
-          , " B", TEMP_UNIT(ui.preheat_bed_temp[i])
-          , " F", int(ui.preheat_fan_speed[i])
-        );
-      }
-
-    #endif
-
-    #if HAS_PID_HEATING
-
-      CONFIG_ECHO_HEADING("PID settings:");
-      #if ENABLED(PIDTEMP)
-        #if HOTENDS > 1
-          if (forReplay) {
-            HOTEND_LOOP() {
-              CONFIG_ECHO_START();
-              SERIAL_ECHOPAIR(
-                  "  M301 E", e
-                , " P", PID_PARAM(Kp, e)
-                , " I", unscalePID_i(PID_PARAM(Ki, e))
-                , " D", unscalePID_d(PID_PARAM(Kd, e))
-              );
-              #if ENABLED(PID_EXTRUSION_SCALING)
-                SERIAL_ECHOPAIR(" C", PID_PARAM(Kc, e));
-                if (e == 0) SERIAL_ECHOPAIR(" L", thermalManager.lpq_len);
-              #endif
-              SERIAL_EOL();
-            }
-          }
-          else
-        #endif // HOTENDS > 1
-        // !forReplay || HOTENDS == 1
-        {
-          CONFIG_ECHO_START();
-          SERIAL_ECHOLNPAIR(
-              "  M301 P", PID_PARAM(Kp, 0) // for compatibility with hosts, only echo values for E0
-            , " I", unscalePID_i(PID_PARAM(Ki, 0))
-            , " D", unscalePID_d(PID_PARAM(Kd, 0))
-            #if ENABLED(PID_EXTRUSION_SCALING)
-              , " C", PID_PARAM(Kc, 0)
-              , " L", thermalManager.lpq_len
-            #endif
-          );
-        }
-      #endif // PIDTEMP
-
-      #if ENABLED(PIDTEMPBED)
-        CONFIG_ECHO_START();
-        SERIAL_ECHOLNPAIR(
-            "  M304 P", thermalManager.temp_bed.pid.Kp
-          , " I", unscalePID_i(thermalManager.temp_bed.pid.Ki)
-          , " D", unscalePID_d(thermalManager.temp_bed.pid.Kd)
-        );
-      #endif
-
-    #endif // PIDTEMP || PIDTEMPBED
-
-    #if HAS_USER_THERMISTORS
-      CONFIG_ECHO_HEADING("User thermistors:");
-      for (uint8_t i = 0; i < USER_THERMISTORS; i++)
-        thermalManager.log_user_thermistor(i, true);
-    #endif
 
     #if HAS_LCD_CONTRAST
       CONFIG_ECHO_HEADING("LCD Contrast:");
@@ -3111,269 +2648,6 @@ void MarlinSettings::reset() {
       #endif
     #endif
 
-    #if HAS_TRINAMIC
-
-      /**
-       * TMC stepper driver current
-       */
-      CONFIG_ECHO_HEADING("Stepper driver current:");
-
-      #if AXIS_IS_TMC(X) || AXIS_IS_TMC(Y) || AXIS_IS_TMC(Z)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(
-          #if AXIS_IS_TMC(X)
-            " X", stepperX.getMilliamps(),
-          #endif
-          #if AXIS_IS_TMC(Y)
-            " Y", stepperY.getMilliamps(),
-          #endif
-          #if AXIS_IS_TMC(Z)
-            " Z", stepperZ.getMilliamps()
-          #endif
-        );
-      #endif
-
-      #if AXIS_IS_TMC(X2) || AXIS_IS_TMC(Y2) || AXIS_IS_TMC(Z2)
-        say_M906(forReplay);
-        SERIAL_ECHOPGM(" I1");
-        SERIAL_ECHOLNPAIR(
-          #if AXIS_IS_TMC(X2)
-            " X", stepperX2.getMilliamps(),
-          #endif
-          #if AXIS_IS_TMC(Y2)
-            " Y", stepperY2.getMilliamps(),
-          #endif
-          #if AXIS_IS_TMC(Z2)
-            " Z", stepperZ2.getMilliamps()
-          #endif
-        );
-      #endif
-
-      #if AXIS_IS_TMC(Z3)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" I2 Z", stepperZ3.getMilliamps());
-      #endif
-
-      #if AXIS_IS_TMC(E0)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T0 E", stepperE0.getMilliamps());
-      #endif
-      #if AXIS_IS_TMC(E1)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T1 E", stepperE1.getMilliamps());
-      #endif
-      #if AXIS_IS_TMC(E2)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T2 E", stepperE2.getMilliamps());
-      #endif
-      #if AXIS_IS_TMC(E3)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T3 E", stepperE3.getMilliamps());
-      #endif
-      #if AXIS_IS_TMC(E4)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T4 E", stepperE4.getMilliamps());
-      #endif
-      #if AXIS_IS_TMC(E5)
-        say_M906(forReplay);
-        SERIAL_ECHOLNPAIR(" T5 E", stepperE5.getMilliamps());
-      #endif
-      SERIAL_EOL();
-
-      /**
-       * TMC Hybrid Threshold
-       */
-      #if ENABLED(HYBRID_THRESHOLD)
-        CONFIG_ECHO_HEADING("Hybrid Threshold:");
-        CONFIG_ECHO_START();
-        #if AXIS_HAS_STEALTHCHOP(X) || AXIS_HAS_STEALTHCHOP(Y) || AXIS_HAS_STEALTHCHOP(Z)
-          say_M913();
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(X)
-          SERIAL_ECHOPAIR(" X", stepperX.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Y)
-          SERIAL_ECHOPAIR(" Y", stepperY.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Z)
-          SERIAL_ECHOPAIR(" Z", stepperZ.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(X) || AXIS_HAS_STEALTHCHOP(Y) || AXIS_HAS_STEALTHCHOP(Z)
-          SERIAL_EOL();
-        #endif
-
-        #if AXIS_HAS_STEALTHCHOP(X2) || AXIS_HAS_STEALTHCHOP(Y2) || AXIS_HAS_STEALTHCHOP(Z2)
-          say_M913();
-          SERIAL_ECHOPGM(" I1");
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(X2)
-          SERIAL_ECHOPAIR(" X", stepperX2.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Y2)
-          SERIAL_ECHOPAIR(" Y", stepperY2.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Z2)
-          SERIAL_ECHOPAIR(" Z", stepperZ2.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(X2) || AXIS_HAS_STEALTHCHOP(Y2) || AXIS_HAS_STEALTHCHOP(Z2)
-          SERIAL_EOL();
-        #endif
-
-        #if AXIS_HAS_STEALTHCHOP(Z3)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" I2 Z", stepperZ3.get_pwm_thrs());
-        #endif
-
-        #if AXIS_HAS_STEALTHCHOP(E0)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T0 E", stepperE0.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E1)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T1 E", stepperE1.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E2)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T2 E", stepperE2.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E3)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T3 E", stepperE3.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E4)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T4 E", stepperE4.get_pwm_thrs());
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E5)
-          say_M913();
-          SERIAL_ECHOLNPAIR(" T5 E", stepperE5.get_pwm_thrs());
-        #endif
-        SERIAL_EOL();
-      #endif // HYBRID_THRESHOLD
-
-      /**
-       * TMC Sensorless homing thresholds
-       */
-      #if USE_SENSORLESS
-        CONFIG_ECHO_HEADING("StallGuard threshold:");
-        CONFIG_ECHO_START();
-        #if X_SENSORLESS || Y_SENSORLESS || Z_SENSORLESS
-          say_M914();
-          #if X_SENSORLESS
-            SERIAL_ECHOPAIR(" X", stepperX.homing_threshold());
-          #endif
-          #if Y_SENSORLESS
-            SERIAL_ECHOPAIR(" Y", stepperY.homing_threshold());
-          #endif
-          #if Z_SENSORLESS
-            SERIAL_ECHOPAIR(" Z", stepperZ.homing_threshold());
-          #endif
-          SERIAL_EOL();
-        #endif
-
-        #define HAS_X2_SENSORLESS (defined(X_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(X2))
-        #define HAS_Y2_SENSORLESS (defined(Y_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(Y2))
-        #define HAS_Z2_SENSORLESS (defined(Z_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(Z2))
-        #define HAS_Z3_SENSORLESS (defined(Z_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(Z3))
-        #if HAS_X2_SENSORLESS || HAS_Y2_SENSORLESS || HAS_Z2_SENSORLESS
-          say_M914();
-          SERIAL_ECHOPGM(" I1");
-          #if HAS_X2_SENSORLESS
-            SERIAL_ECHOPAIR(" X", stepperX2.homing_threshold());
-          #endif
-          #if HAS_Y2_SENSORLESS
-            SERIAL_ECHOPAIR(" Y", stepperY2.homing_threshold());
-          #endif
-          #if HAS_Z2_SENSORLESS
-            SERIAL_ECHOPAIR(" Z", stepperZ2.homing_threshold());
-          #endif
-          SERIAL_EOL();
-        #endif
-
-        #if HAS_Z3_SENSORLESS
-          say_M914();
-          SERIAL_ECHOLNPAIR(" I2 Z", stepperZ3.homing_threshold());
-        #endif
-
-      #endif // USE_SENSORLESS
-
-      /**
-       * TMC stepping mode
-       */
-      #if HAS_STEALTHCHOP
-        CONFIG_ECHO_HEADING("Driver stepping mode:");
-        CONFIG_ECHO_START();
-        #if AXIS_HAS_STEALTHCHOP(X)
-          const bool chop_x = stepperX.get_stealthChop_status();
-        #else
-          constexpr bool chop_x = false;
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Y)
-          const bool chop_y = stepperY.get_stealthChop_status();
-        #else
-          constexpr bool chop_y = false;
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Z)
-          const bool chop_z = stepperZ.get_stealthChop_status();
-        #else
-          constexpr bool chop_z = false;
-        #endif
-
-        if (chop_x || chop_y || chop_z) say_M569();
-        if (chop_x) SERIAL_ECHOPGM(" X");
-        if (chop_y) SERIAL_ECHOPGM(" Y");
-        if (chop_z) SERIAL_ECHOPGM(" Z");
-        if (chop_x || chop_y || chop_z) SERIAL_EOL();
-
-        #if AXIS_HAS_STEALTHCHOP(X2)
-          const bool chop_x2 = stepperX2.get_stealthChop_status();
-        #else
-          constexpr bool chop_x2 = false;
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Y2)
-          const bool chop_y2 = stepperY2.get_stealthChop_status();
-        #else
-          constexpr bool chop_y2 = false;
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(Z2)
-          const bool chop_z2 = stepperZ2.get_stealthChop_status();
-        #else
-          constexpr bool chop_z2 = false;
-        #endif
-
-        if (chop_x2 || chop_y2 || chop_z2) say_M569(PSTR("I1"));
-        if (chop_x2) SERIAL_ECHOPGM(" X");
-        if (chop_y2) SERIAL_ECHOPGM(" Y");
-        if (chop_z2) SERIAL_ECHOPGM(" Z");
-        if (chop_x2 || chop_y2 || chop_z2) SERIAL_EOL();
-
-        #if AXIS_HAS_STEALTHCHOP(Z3)
-          if (stepperZ3.get_stealthChop_status()) { say_M569(PSTR("I2 Z")); }
-        #endif
-
-        #if AXIS_HAS_STEALTHCHOP(E0)
-          if (stepperE0.get_stealthChop_status()) { say_M569(PSTR("T0 E")); }
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E1)
-          if (stepperE1.get_stealthChop_status()) { say_M569(PSTR("T1 E")); }
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E2)
-          if (stepperE2.get_stealthChop_status()) { say_M569(PSTR("T2 E")); }
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E3)
-          if (stepperE3.get_stealthChop_status()) { say_M569(PSTR("T3 E")); }
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E4)
-          if (stepperE4.get_stealthChop_status()) { say_M569(PSTR("T4 E")); }
-        #endif
-        #if AXIS_HAS_STEALTHCHOP(E5)
-          if (stepperE5.get_stealthChop_status()) { say_M569(PSTR("T5 E")); }
-        #endif
-
-      #endif // HAS_STEALTHCHOP
-
-    #endif // HAS_TRINAMIC
-
     /**
      * Linear Advance
      */
@@ -3398,39 +2672,6 @@ void MarlinSettings::reset() {
       );
     #endif
 
-    /**
-     * Advanced Pause filament load & unload lengths
-     */
-    #if ENABLED(ADVANCED_PAUSE_FEATURE)
-      CONFIG_ECHO_HEADING("Filament load/unload lengths:");
-      #if EXTRUDERS == 1
-        say_M603(forReplay);
-        SERIAL_ECHOLNPAIR("L", LINEAR_UNIT(fc_settings[0].load_length), " U", LINEAR_UNIT(fc_settings[0].unload_length));
-      #else
-        #define _ECHO_603(N) do{ say_M603(forReplay); SERIAL_ECHOLNPAIR("T" STRINGIFY(N) " L", LINEAR_UNIT(fc_settings[N].load_length), " U", LINEAR_UNIT(fc_settings[N].unload_length)); }while(0)
-        _ECHO_603(0);
-        _ECHO_603(1);
-        #if EXTRUDERS > 2
-          _ECHO_603(2);
-          #if EXTRUDERS > 3
-            _ECHO_603(3);
-            #if EXTRUDERS > 4
-              _ECHO_603(4);
-              #if EXTRUDERS > 5
-                _ECHO_603(5);
-              #endif // EXTRUDERS > 5
-            #endif // EXTRUDERS > 4
-          #endif // EXTRUDERS > 3
-        #endif // EXTRUDERS > 2
-      #endif // EXTRUDERS == 1
-    #endif // ADVANCED_PAUSE_FEATURE
-
-    #if EXTRUDERS > 1
-      CONFIG_ECHO_HEADING("Tool-changing:");
-      CONFIG_ECHO_START();
-      M217_report(true);
-    #endif
-
     #if ENABLED(BACKLASH_GCODE)
       CONFIG_ECHO_HEADING("Backlash compensation:");
       CONFIG_ECHO_START();
@@ -3445,16 +2686,6 @@ void MarlinSettings::reset() {
       );
     #endif
 
-    #if HAS_FILAMENT_SENSOR
-      CONFIG_ECHO_HEADING("Filament runout sensor:");
-      CONFIG_ECHO_START();
-      SERIAL_ECHOLNPAIR(
-        "  M412 S", int(runout.enabled)
-        #ifdef FILAMENT_RUNOUT_DISTANCE_MM
-          , " D", LINEAR_UNIT(runout.runout_distance())
-        #endif
-      );
-    #endif
   }
 
 #endif // !DISABLE_M503

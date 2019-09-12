@@ -31,18 +31,6 @@
 #include "../../module/endstops.h"
 #include "../../lcd/ultralcd.h"
 
-#if HAS_BED_PROBE
-  #include "../../module/probe.h"
-#endif
-
-#if HOTENDS > 1
-  #include "../../module/tool_change.h"
-#endif
-
-#if HAS_LEVELING
-  #include "../../feature/bedlevel/bedlevel.h"
-#endif
-
 constexpr uint8_t _7P_STEP = 1,              // 7-point step - to change number of calibration points
                   _4P_STEP = _7P_STEP * 2,   // 4-point step
                   NPP      = _7P_STEP * 6;   // number of calibration points on the radius

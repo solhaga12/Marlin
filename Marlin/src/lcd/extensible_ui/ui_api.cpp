@@ -50,7 +50,7 @@
 #include "../../module/motion.h"
 #include "../../module/planner.h"
 #include "../../module/probe.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../module/printcounter.h"
 #include "../../libs/duration_t.h"
 #include "../../HAL/shared/Delay.h"
@@ -58,10 +58,6 @@
 #if ENABLED(PRINTCOUNTER)
   #include "../../core/utility.h"
   #include "../../libs/numtostr.h"
-#endif
-
-#if DO_SWITCH_EXTRUDER || EITHER(SWITCHING_NOZZLE, PARKING_EXTRUDER)
-  #include "../../module/tool_change.h"
 #endif
 
 #if ENABLED(EMERGENCY_PARSER)

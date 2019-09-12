@@ -25,7 +25,7 @@
 #if HAS_PID_HEATING
 
 #include "../gcode.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 /**
  * M303: PID relay autotune

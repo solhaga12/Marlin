@@ -309,7 +309,6 @@ public:
   static millis_t previous_move_ms;
   FORCE_INLINE static void reset_stepper_timeout() { previous_move_ms = millis(); }
 
-  static int8_t get_target_extruder_from_command();
   static int8_t get_target_e_stepper_from_command();
   static void get_destination_from_command();
 
@@ -529,20 +528,13 @@ private:
     static void M80();
   #endif
 
-  static void M81();
   static void M82();
   static void M83();
   static void M85();
-  static void M92();
 
   #if ENABLED(M100_FREE_MEMORY_WATCHER)
     static void M100();
   #endif
-
-  static void M104();
-  static void M105();
-  static void M106();
-  static void M107();
 
   #if DISABLED(EMERGENCY_PARSER)
     static void M108();
@@ -552,8 +544,6 @@ private:
       static void M876();
     #endif
   #endif
-
-  static void M109();
 
   static void M110();
   static void M111();
@@ -622,14 +612,10 @@ private:
     #endif
   #endif
 
-  static void M200();
-  static void M201();
-
   #if 0
     static void M202(); // Not used for Sprinter/grbl gen6
   #endif
 
-  static void M203();
   static void M204();
   static void M205();
 
@@ -656,7 +642,6 @@ private:
   #endif
 
   static void M220();
-  static void M221();
   static void M226();
 
   #if ENABLED(PHOTO_GCODE)
@@ -892,8 +877,6 @@ private:
   #if ENABLED(MAX7219_GCODE)
     static void M7219();
   #endif
-
-  static void T(const uint8_t tool_index);
 
 };
 

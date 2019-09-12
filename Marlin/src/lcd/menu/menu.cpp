@@ -38,7 +38,7 @@
 #endif
 
 #if WATCH_HOTENDS || WATCH_BED
-  #include "../../module/temperature.h"
+  #include "../../module/voltages.h"
 #endif
 
 #if ENABLED(BABYSTEP_ZPROBE_OFFSET)

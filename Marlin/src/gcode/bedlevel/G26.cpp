@@ -38,8 +38,7 @@
 #include "../../module/planner.h"
 #include "../../module/stepper.h"
 #include "../../module/motion.h"
-#include "../../module/tool_change.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../lcd/ultralcd.h"
 
 #define EXTRUSION_MULTIPLIER 1.0

@@ -26,7 +26,7 @@
 
 #include "../../../feature/filwidth.h"
 #include "../../../module/planner.h"
-#include "../../../module/temperature.h"
+#include "../../../module/voltages.h"
 #include "../../../Marlin.h"
 #include "../../gcode.h"
 

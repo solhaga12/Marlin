@@ -65,7 +65,7 @@
 #include "planner.h"
 #include "stepper.h"
 #include "motion.h"
-#include "temperature.h"
+#include "voltages.h"
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
 #include "../gcode/parser.h"
@@ -1187,43 +1187,13 @@ void Planner::check_axes_activity() {
   if (has_blocks_queued()) {
     block_t* block;
 
-    #if FAN_COUNT > 0 || ENABLED(BARICUDA)
-      block = &block_buffer[block_buffer_tail];
-    #endif
-
-    #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i, block->fan_speed[i]);
-    #endif
-
-    #if ENABLED(BARICUDA)
-      #if HAS_HEATER_1
-        tail_valve_pressure = block->valve_pressure;
-      #endif
-      #if HAS_HEATER_2
-        tail_e_to_p_pressure = block->e_to_p_pressure;
-      #endif
-    #endif
-
     for (uint8_t b = block_buffer_tail; b != block_buffer_head; b = next_block_index(b)) {
       block = &block_buffer[b];
       LOOP_XYZE(i) if (block->steps[i]) axis_active[i]++;
     }
   }
   else {
-    #if FAN_COUNT > 0
-      FANS_LOOP(i)
-        tail_fan_speed[i] = thermalManager.scaledFanSpeed(i);
-    #endif
 
-    #if ENABLED(BARICUDA)
-      #if HAS_HEATER_1
-        tail_valve_pressure = baricuda_valve_pressure;
-      #endif
-      #if HAS_HEATER_2
-        tail_e_to_p_pressure = baricuda_e_to_p_pressure;
-      #endif
-    #endif
   }
 
   #if ENABLED(DISABLE_X)
@@ -1821,28 +1791,6 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
 
   // Bail if this is a zero-length block
   if (block->step_event_count < MIN_STEPS_PER_SEGMENT) return false;
-
-  #if ENABLED(MIXING_EXTRUDER)
-    MIXER_POPULATE_BLOCK();
-  #endif
-
-  #if FAN_COUNT > 0
-    FANS_LOOP(i) block->fan_speed[i] = thermalManager.fan_speed[i];
-  #endif
-
-  #if ENABLED(BARICUDA)
-    block->valve_pressure = baricuda_valve_pressure;
-    block->e_to_p_pressure = baricuda_e_to_p_pressure;
-  #endif
-
-  #if EXTRUDERS > 1
-    block->extruder = extruder;
-  #endif
-
-  #if ENABLED(AUTO_POWER_CONTROL)
-    if (block->steps[X_AXIS] || block->steps[Y_AXIS] || block->steps[Z_AXIS])
-      powerManager.power_on();
-  #endif
 
   // Enable active axes
   #if CORE_IS_XY

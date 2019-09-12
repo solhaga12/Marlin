@@ -29,7 +29,7 @@
 #if HAS_LCD_MENU
 
 #include "menu.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../gcode/queue.h"
 #include "../../module/printcounter.h"
 #include "../../module/stepper.h"

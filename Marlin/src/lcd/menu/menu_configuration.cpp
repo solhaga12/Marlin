@@ -100,60 +100,6 @@ static void lcd_factory_settings() {
 
 #endif
 
-#if EXTRUDERS > 1
-
-  #include "../../module/tool_change.h"
-
-  void menu_tool_change() {
-    START_MENU();
-    MENU_BACK(MSG_CONFIGURATION);
-    #if ENABLED(TOOLCHANGE_FILAMENT_SWAP)
-      static constexpr float max_extrude =
-        #if ENABLED(PREVENT_LENGTHY_EXTRUDE)
-          EXTRUDE_MAXLENGTH
-        #else
-          500
-        #endif
-      ;
-      MENU_ITEM_EDIT(float3, MSG_FILAMENT_SWAP_LENGTH, &toolchange_settings.swap_length, 0, max_extrude);
-      MENU_ITEM_EDIT(float3, MSG_FILAMENT_PURGE_LENGTH, &toolchange_settings.extra_prime, 0, max_extrude);
-      MENU_MULTIPLIER_ITEM_EDIT(int4, MSG_SINGLENOZZLE_RETRACT_SPD, &toolchange_settings.retract_speed, 10, 5400);
-      MENU_MULTIPLIER_ITEM_EDIT(int4, MSG_SINGLENOZZLE_PRIME_SPD, &toolchange_settings.prime_speed, 10, 5400);
-    #endif
-    MENU_ITEM_EDIT(float3, MSG_TOOL_CHANGE_ZLIFT, &toolchange_settings.z_raise, 0, 10);
-    END_MENU();
-  }
-
-#endif
-
-#if HAS_HOTEND_OFFSET
-  #include "../../module/motion.h"
-  #include "../../gcode/queue.h"
-
-  void menu_tool_offsets() {
-
-    auto _recalc_offsets = []{
-      if (active_extruder && all_axes_known()) {  // For the 2nd extruder re-home so the next tool-change gets the new offsets.
-        queue.inject_P(PSTR("G28")); // In future, we can babystep the 2nd extruder (if active), making homing unnecessary.
-        active_extruder = 0;
-      }
-    };
-
-    START_MENU();
-    MENU_BACK(MSG_CONFIGURATION);
-    #if ENABLED(DUAL_X_CARRIAGE)
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float51, MSG_X_OFFSET, &hotend_offset[X_AXIS][1], float(X2_HOME_POS - 25), float(X2_HOME_POS + 25), _recalc_offsets);
-    #else
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float52sign, MSG_X_OFFSET, &hotend_offset[X_AXIS][1], -10.0, 10.0, _recalc_offsets);
-    #endif
-    MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float52sign, MSG_Y_OFFSET, &hotend_offset[Y_AXIS][1], -10.0, 10.0, _recalc_offsets);
-    MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float52sign, MSG_Z_OFFSET, &hotend_offset[Z_AXIS][1], Z_PROBE_LOW_POINT, 10.0, _recalc_offsets);
-    #if ENABLED(EEPROM_SETTINGS)
-      MENU_ITEM(function, MSG_STORE_EEPROM, lcd_store_settings);
-    #endif
-    END_MENU();
-  }
-#endif
 
 #if ENABLED(DUAL_X_CARRIAGE)
 

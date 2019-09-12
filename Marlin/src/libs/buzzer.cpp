@@ -25,7 +25,7 @@
 #if DISABLED(LCD_USE_I2C_BUZZER) && PIN_EXISTS(BEEPER)
 
 #include "buzzer.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 
 #if ENABLED(EXTENSIBLE_UI)
   #include "../lcd/extensible_ui/ui_api.h"
@@ -46,7 +46,6 @@ Buzzer buzzer;
 void Buzzer::tone(const uint16_t duration, const uint16_t frequency/*=0*/) {
   while (buffer.isFull()) {
     tick();
-    thermalManager.manage_heater();
   }
   tone_t tone = { duration, frequency };
   buffer.enqueue(tone);

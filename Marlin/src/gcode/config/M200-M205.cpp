@@ -24,67 +24,6 @@
 #include "../../Marlin.h"
 #include "../../module/planner.h"
 
-#if DISABLED(NO_VOLUMETRICS)
-
-  /**
-   * M200: Set filament diameter and set E axis units to cubic units
-   *
-   *    T<extruder> - Optional extruder number. Current extruder if omitted.
-   *    D<linear> - Diameter of the filament. Use "D0" to switch back to linear units on the E axis.
-   */
-  void GcodeSuite::M200() {
-
-    const int8_t target_extruder = get_target_extruder_from_command();
-    if (target_extruder < 0) return;
-
-    if (parser.seen('D')) {
-      // setting any extruder filament size disables volumetric on the assumption that
-      // slicers either generate in extruder values as cubic mm or as as filament feeds
-      // for all extruders
-      if ( (parser.volumetric_enabled = (parser.value_linear_units() != 0)) )
-        planner.set_filament_size(target_extruder, parser.value_linear_units());
-    }
-    planner.calculate_volumetric_multipliers();
-  }
-
-#endif // !NO_VOLUMETRICS
-
-/**
- * M201: Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
- *
- *       With multiple extruders use T to specify which one.
- */
-void GcodeSuite::M201() {
-
-  const int8_t target_extruder = get_target_extruder_from_command();
-  if (target_extruder < 0) return;
-
-  LOOP_XYZE(i) {
-    if (parser.seen(axis_codes[i])) {
-      const uint8_t a = (i == E_AXIS ? uint8_t(E_AXIS_N(target_extruder)) : i);
-      planner.settings.max_acceleration_mm_per_s2[a] = parser.value_axis_units((AxisEnum)a);
-    }
-  }
-  // steps per sq second need to be updated to agree with the units per sq second (as they are what is used in the planner)
-  planner.reset_acceleration_rates();
-}
-
-/**
- * M203: Set maximum feedrate that your machine can sustain (M203 X200 Y200 Z300 E10000) in units/sec
- *
- *       With multiple extruders use T to specify which one.
- */
-void GcodeSuite::M203() {
-
-  const int8_t target_extruder = get_target_extruder_from_command();
-  if (target_extruder < 0) return;
-
-  LOOP_XYZE(i)
-    if (parser.seen(axis_codes[i])) {
-      const uint8_t a = (i == E_AXIS ? uint8_t(E_AXIS_N(target_extruder)) : i);
-      planner.settings.max_feedrate_mm_s[a] = parser.value_axis_units((AxisEnum)a);
-    }
-}
 
 /**
  * M204: Set Accelerations in units/sec^2 (M204 P1200 R3000 T3000)

@@ -315,10 +315,6 @@ public:
       static inline void refresh(const LCDViewAction type) { lcdDrawUpdate = type; }
       static inline void refresh() { refresh(LCDVIEW_CLEAR_CALL_REDRAW); }
 
-      #if ENABLED(SHOW_BOOTSCREEN)
-        static void show_bootscreen();
-      #endif
-
       #if HAS_GRAPHICAL_LCD
 
         static bool drawing_screen, first_page;

@@ -33,7 +33,7 @@
 #include "../../ui_api.h"
 
 #include "../../../../Marlin.h"
-#include "../../../../module/temperature.h"
+#include "../../../../module/voltages.h"
 #include "../../../../module/motion.h"
 #include "../../../../gcode/queue.h"
 #include "../../../../module/planner.h"

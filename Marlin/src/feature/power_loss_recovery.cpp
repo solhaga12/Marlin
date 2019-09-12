@@ -43,7 +43,7 @@ job_recovery_info_t PrintJobRecovery::info;
 #include "../module/motion.h"
 #include "../module/planner.h"
 #include "../module/printcounter.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 #include "../core/serial.h"
 
 #if ENABLED(FWRETRACT)

@@ -36,7 +36,7 @@
 #include "../../libs/numtostr.h"
 
 #include "../../module/motion.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 #if ENABLED(FILAMENT_LCD_DISPLAY)
   #include "../../feature/filwidth.h"

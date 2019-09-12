@@ -21,6 +21,7 @@
  */
 
 #include "../../inc/MarlinConfigPre.h"
+#include "../../core/serial.h"
 
 #if HAS_CHARACTER_LCD
 
@@ -36,10 +37,11 @@
 #include "../../libs/numtostr.h"
 
 #include "../../sd/cardreader.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../module/printcounter.h"
 #include "../../module/planner.h"
 #include "../../module/motion.h"
+#include "../../libs/numtostr.h"
 
 #if DISABLED(LCD_PROGRESS_BAR) && BOTH(FILAMENT_LCD_DISPLAY, SDSUPPORT)
   #include "../../feature/filwidth.h"
@@ -117,45 +119,6 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
   #endif
 
   // CHARSET_BOOT
-  #if ENABLED(SHOW_BOOTSCREEN)
-    const static PROGMEM byte corner[4][8] = { {
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00001,
-      B00010,
-      B00100,
-      B00100
-    }, {
-      B00000,
-      B00000,
-      B00000,
-      B11100,
-      B11100,
-      B01100,
-      B00100,
-      B00100
-    }, {
-      B00100,
-      B00010,
-      B00001,
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00000
-    }, {
-      B00100,
-      B01000,
-      B10000,
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00000
-    } };
-  #endif // SHOW_BOOTSCREEN
 
   // CHARSET_INFO
   const static PROGMEM byte bedTemp[8] = {
@@ -295,14 +258,6 @@ void MarlinUI::set_custom_characters(const HD44780CharSet screen_charset/*=CHARS
 
   #endif // SDSUPPORT
 
-  #if ENABLED(SHOW_BOOTSCREEN)
-    // Set boot screen corner characters
-    if (screen_charset == CHARSET_BOOT) {
-      for (uint8_t i = 4; i--;)
-        createChar_P(i, corner[i]);
-    }
-    else
-  #endif
     { // Info Screen uses 5 special characters
       createChar_P(LCD_STR_BEDTEMP[0], bedTemp);
       createChar_P(LCD_STR_DEGREE[0], degree);
@@ -362,134 +317,6 @@ void MarlinUI::init_lcd() {
 
 void MarlinUI::clear_lcd() { lcd.clear(); }
 
-#if ENABLED(SHOW_BOOTSCREEN)
-
-  void lcd_erase_line(const int16_t line) {
-    lcd_moveto(0, line);
-    for (uint8_t i = LCD_WIDTH + 1; --i;)
-      lcd_put_wchar(' ');
-  }
-
-  // Scroll the PSTR 'text' in a 'len' wide field for 'time' milliseconds at position col,line
-  void lcd_scroll(const uint8_t col, const uint8_t line, PGM_P const text, const uint8_t len, const int16_t time) {
-    uint8_t slen = utf8_strlen_P(text);
-    if (slen < len) {
-      // Fits into,
-      lcd_moveto(col, line);
-      lcd_put_u8str_max_P(text, len);
-      for (; slen < len; ++slen) lcd_put_wchar(' ');
-      safe_delay(time);
-    }
-    else {
-      PGM_P p = text;
-      int dly = time / _MAX(slen, 1);
-      for (uint8_t i = 0; i <= slen; i++) {
-
-        // Go to the correct place
-        lcd_moveto(col, line);
-
-        // Print the text
-        lcd_put_u8str_max_P(p, len);
-
-        // Fill with spaces
-        for (uint8_t ix = slen - i; ix < len; ++ix) lcd_put_wchar(' ');
-
-        // Delay
-        safe_delay(dly);
-
-        // Advance to the next UTF8 valid position
-        p++;
-        while (!START_OF_UTF8_CHAR(pgm_read_byte(p))) p++;
-      }
-    }
-  }
-
-  static void logo_lines(PGM_P const extra) {
-    int16_t indent = (LCD_WIDTH - 8 - utf8_strlen_P(extra)) / 2;
-    lcd_moveto(indent, 0); lcd_put_wchar('\x00'); lcd_put_u8str_P(PSTR( "------" ));  lcd_put_wchar('\x01');
-    lcd_moveto(indent, 1);                        lcd_put_u8str_P(PSTR("|Marlin|"));  lcd_put_u8str_P(extra);
-    lcd_moveto(indent, 2); lcd_put_wchar('\x02'); lcd_put_u8str_P(PSTR( "------" ));  lcd_put_wchar('\x03');
-  }
-
-  void MarlinUI::show_bootscreen() {
-    set_custom_characters(CHARSET_BOOT);
-    lcd.clear();
-
-    #define LCD_EXTRA_SPACE (LCD_WIDTH-8)
-
-    #define CENTER_OR_SCROLL(STRING,DELAY) \
-      lcd_erase_line(3); \
-      if (utf8_strlen(STRING) <= LCD_WIDTH) { \
-        lcd_moveto((LCD_WIDTH - utf8_strlen_P(PSTR(STRING))) / 2, 3); \
-        lcd_put_u8str_P(PSTR(STRING)); \
-        safe_delay(DELAY); \
-      } \
-      else { \
-        lcd_scroll(0, 3, PSTR(STRING), LCD_WIDTH, DELAY); \
-      }
-
-    #ifdef STRING_SPLASH_LINE1
-      //
-      // Show the Marlin logo with splash line 1
-      //
-      if (LCD_EXTRA_SPACE >= utf8_strlen(STRING_SPLASH_LINE1) + 1) {
-        //
-        // Show the Marlin logo, splash line1, and splash line 2
-        //
-        logo_lines(PSTR(" " STRING_SPLASH_LINE1));
-        #ifdef STRING_SPLASH_LINE2
-          CENTER_OR_SCROLL(STRING_SPLASH_LINE2, 2000);
-        #else
-          safe_delay(2000);
-        #endif
-      }
-      else {
-        //
-        // Show the Marlin logo with splash line 1
-        // After a delay show splash line 2, if it exists
-        //
-        #ifdef STRING_SPLASH_LINE2
-          #define _SPLASH_WAIT_1 1500
-        #else
-          #define _SPLASH_WAIT_1 2000
-        #endif
-        logo_lines(PSTR(""));
-        CENTER_OR_SCROLL(STRING_SPLASH_LINE1, _SPLASH_WAIT_1);
-        #ifdef STRING_SPLASH_LINE2
-          CENTER_OR_SCROLL(STRING_SPLASH_LINE2, 1500);
-          #ifdef STRING_SPLASH_LINE3
-            CENTER_OR_SCROLL(STRING_SPLASH_LINE3, 1500);
-          #endif
-        #endif
-      }
-    #elif defined(STRING_SPLASH_LINE2)
-      //
-      // Show splash line 2 only, alongside the logo if possible
-      //
-      if (LCD_EXTRA_SPACE >= utf8_strlen(STRING_SPLASH_LINE2) + 1) {
-        logo_lines(PSTR(" " STRING_SPLASH_LINE2));
-        safe_delay(2000);
-      }
-      else {
-        logo_lines(PSTR(""));
-        CENTER_OR_SCROLL(STRING_SPLASH_LINE2, 2000);
-      }
-    #else
-      //
-      // Show only the Marlin logo
-      //
-      logo_lines(PSTR(""));
-      safe_delay(2000);
-    #endif
-
-    lcd.clear();
-    safe_delay(100);
-    set_custom_characters(CHARSET_INFO);
-    lcd.clear();
-  }
-
-#endif // SHOW_BOOTSCREEN
-
 void MarlinUI::draw_kill_screen() {
   lcd_moveto(0, 0);
   lcd_put_u8str(status_message);
@@ -526,54 +353,6 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
   }
 }
 
-FORCE_INLINE void _draw_heater_status(const heater_ind_t heater, const char prefix, const bool blink) {
-  #if HAS_HEATED_BED
-    const bool isBed = heater < 0;
-    const float t1 = (isBed ? thermalManager.degBed()       : thermalManager.degHotend(heater)),
-                t2 = (isBed ? thermalManager.degTargetBed() : thermalManager.degTargetHotend(heater));
-  #else
-    const float t1 = thermalManager.degHotend(heater), t2 = thermalManager.degTargetHotend(heater);
-  #endif
-
-  if (prefix >= 0) lcd_put_wchar(prefix);
-
-  lcd_put_u8str(i16tostr3(t1 + 0.5));
-  lcd_put_wchar('/');
-
-  #if !HEATER_IDLE_HANDLER
-    UNUSED(blink);
-  #else
-    const bool is_idle = (
-      #if HAS_HEATED_BED
-        isBed ? thermalManager.bed_idle.timed_out :
-      #endif
-      thermalManager.hotend_idle[heater].timed_out
-    );
-
-    if (!blink && is_idle) {
-      lcd_put_wchar(' ');
-      if (t2 >= 10) lcd_put_wchar(' ');
-      if (t2 >= 100) lcd_put_wchar(' ');
-    }
-    else
-  #endif
-      lcd_put_u8str(i16tostr3left(t2 + 0.5));
-
-  if (prefix >= 0) {
-    lcd_put_wchar(LCD_STR_DEGREE[0]);
-    lcd_put_wchar(' ');
-    if (t2 < 10) lcd_put_wchar(' ');
-  }
-}
-
-FORCE_INLINE void _draw_bed_status(const bool blink) {
-  _draw_heater_status(H_BED, (
-    #if HAS_LEVELING
-      planner.leveling_active && blink ? '_' :
-    #endif
-    LCD_STR_BEDTEMP[0]
-  ), blink);
-}
 
 #if HAS_PRINT_PROGRESS
 
@@ -745,13 +524,11 @@ void MarlinUI::draw_status_screen() {
 
     // ========== Line 1 ==========
     // Show Status(Off, Start (start plasma) and Transfer (start machine motion)
-  lcd_put_u8str("Status");
+  //lcd_put_u8str("Status");
 
   // Show current/set Divider Voltage
-  lcd_moveto(10, 0);
-  lcd_put_u8str(ui16tostr4(analogRead(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN)));
-  lcd_put_wchar('/');
-  lcd_put_u8str(ui16tostr4(analogRead(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN)));
+
+  lcd_put_u8str(ui16tostr4(Voltage::getVoltage()));
 
     // ========== Line 2 ==========
 

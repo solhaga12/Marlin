@@ -29,7 +29,7 @@
 #if ENABLED(TEMP_STAT_LEDS)
 
 #include "tempstat.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 void handle_status_leds(void) {
   static int8_t old_red = -1;  // Invalid value to force LED initialization

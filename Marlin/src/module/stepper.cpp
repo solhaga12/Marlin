@@ -93,7 +93,7 @@ Stepper stepper; // Singleton
 #include "planner.h"
 #include "motion.h"
 
-#include "temperature.h"
+#include "voltages.h"
 #include "../lcd/ultralcd.h"
 #include "../core/language.h"
 #include "../gcode/queue.h"

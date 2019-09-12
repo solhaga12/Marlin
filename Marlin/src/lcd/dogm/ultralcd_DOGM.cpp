@@ -52,7 +52,7 @@
 #include "../ultralcd.h"
 
 #include "../../sd/cardreader.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../module/printcounter.h"
 
 #if ENABLED(SDSUPPORT)

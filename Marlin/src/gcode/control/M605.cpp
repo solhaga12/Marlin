@@ -29,7 +29,6 @@
 #include "../gcode.h"
 #include "../../module/motion.h"
 #include "../../module/stepper.h"
-#include "../../module/tool_change.h"
 #include "../../module/planner.h"
 
 #define DEBUG_OUT ENABLED(DEBUG_DXC_MODE)

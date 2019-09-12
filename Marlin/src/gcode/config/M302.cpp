@@ -25,7 +25,7 @@
 #if ENABLED(PREVENT_COLD_EXTRUSION)
 
 #include "../gcode.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 /**
  * M302: Allow cold extrudes, or set the minimum extrude temperature

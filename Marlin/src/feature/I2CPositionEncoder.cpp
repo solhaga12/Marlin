@@ -34,7 +34,7 @@
 
 #include "I2CPositionEncoder.h"
 
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 #include "../module/stepper.h"
 #include "../gcode/parser.h"
 

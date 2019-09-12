@@ -29,7 +29,7 @@
 
 #include "../Marlin.h"
 #include "../sd/cardreader.h"
-#include "temperature.h"
+#include "voltages.h"
 #include "../lcd/ultralcd.h"
 
 #if ENABLED(ENDSTOP_INTERRUPTS_FEATURE)

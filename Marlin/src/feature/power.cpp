@@ -29,7 +29,7 @@
 #if ENABLED(AUTO_POWER_CONTROL)
 
 #include "power.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 #include "../module/stepper_indirection.h"
 #include "../Marlin.h"
 

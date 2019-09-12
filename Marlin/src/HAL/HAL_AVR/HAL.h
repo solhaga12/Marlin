@@ -122,10 +122,10 @@ extern "C" {
 #define HAL_TIMER_RATE          ((F_CPU) / 8)    // i.e., 2MHz or 2.5MHz
 
 #define STEP_TIMER_NUM          1
-#define TEMP_TIMER_NUM          0
+#define VOLTAGE_TIMER_NUM       0
 #define PULSE_TIMER_NUM         STEP_TIMER_NUM
 
-#define TEMP_TIMER_FREQUENCY    ((F_CPU) / 64.0 / 256.0)
+#define VOLTAGE_TIMER_FREQUENCY    ((F_CPU) / 64.0 / 256.0)
 
 #define STEPPER_TIMER_RATE      HAL_TIMER_RATE
 #define STEPPER_TIMER_PRESCALE  8
@@ -139,9 +139,9 @@ extern "C" {
 #define DISABLE_STEPPER_DRIVER_INTERRUPT() CBI(TIMSK1, OCIE1A)
 #define STEPPER_ISR_ENABLED()             TEST(TIMSK1, OCIE1A)
 
-#define ENABLE_TEMPERATURE_INTERRUPT()     SBI(TIMSK0, OCIE0B)
-#define DISABLE_TEMPERATURE_INTERRUPT()    CBI(TIMSK0, OCIE0B)
-#define TEMPERATURE_ISR_ENABLED()         TEST(TIMSK0, OCIE0B)
+#define ENABLE_VOLTAGE_INTERRUPT()     SBI(TIMSK0, OCIE0B)
+#define DISABLE_VOLTAGE_INTERRUPT()    CBI(TIMSK0, OCIE0B)
+#define VOLTAGE_ISR_ENABLED()          TEST(TIMSK0, OCIE0B)
 
 FORCE_INLINE void HAL_timer_start(const uint8_t timer_num, const uint32_t frequency) {
   UNUSED(frequency);
@@ -166,9 +166,9 @@ FORCE_INLINE void HAL_timer_start(const uint8_t timer_num, const uint32_t freque
       TCNT1 = 0;
       break;
 
-    case TEMP_TIMER_NUM:
-      // Use timer0 for temperature measurement
-      // Interleave temperature interrupt with millies interrupt
+    case VOLTAGE_TIMER_NUM:
+      // Use timer0 for voltage measurement
+      // Interleave voltage interrupt with millies interrupt
       OCR0B = 128;
       break;
   }
@@ -268,7 +268,7 @@ void TIMER1_COMPA_vect (void) { \
 void TIMER1_COMPA_vect_bottom(void)
 
 /* 14 cycles maximum latency */
-#define HAL_TEMP_TIMER_ISR() \
+#define HAL_VOLTAGE_TIMER_ISR() \
 extern "C" void TIMER0_COMPB_vect (void) __attribute__ ((signal, naked, used, externally_visible)); \
 extern "C" void TIMER0_COMPB_vect_bottom(void)  asm ("TIMER0_COMPB_vect_bottom") __attribute__ ((used, externally_visible, noinline)); \
 void TIMER0_COMPB_vect (void) { \
@@ -341,14 +341,14 @@ void TIMER0_COMPB_vect_bottom(void)
 #endif
 
 inline void HAL_adc_init(void) {
-  ADCSRA = _BV(ADEN) | _BV(ADSC) | _BV(ADIF) | 0x07;
+  ADCSRA = _BV(ADEN) | _BV(ADSC) | _BV(ADIF) | _BV(REFS0) | _BV(REFS1) | 0x07;
   DIDR0 = 0;
   #ifdef DIDR2
     DIDR2 = 0;
   #endif
 }
 
-#define SET_ADMUX_ADCSRA(pin) ADMUX = _BV(REFS0) | (pin & 0x07); SBI(ADCSRA, ADSC)
+#define SET_ADMUX_ADCSRA(pin) ADMUX = _BV(REFS0)| _BV(REFS1) | (pin & 0x07); SBI(ADCSRA, ADSC)
 #ifdef MUX5
   #define HAL_START_ADC(pin) if (pin > 7) ADCSRB = _BV(MUX5); else ADCSRB = 0; SET_ADMUX_ADCSRA(pin)
 #else

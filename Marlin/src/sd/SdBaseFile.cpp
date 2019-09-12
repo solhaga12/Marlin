@@ -23,7 +23,6 @@
 /**
  * Arduino SdFat Library
  * Copyright (c) 2009 by William Greiman
- *
  * This file is part of the Arduino Sd2Card Library
  */
 

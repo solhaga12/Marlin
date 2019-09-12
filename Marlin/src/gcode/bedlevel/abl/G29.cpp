@@ -55,10 +55,6 @@
   #include "../../../lcd/extensible_ui/ui_api.h"
 #endif
 
-#if HOTENDS > 1
-  #include "../../../module/tool_change.h"
-#endif
-
 #if ABL_GRID
   #if ENABLED(PROBE_Y_FIRST)
     #define PR_OUTER_VAR xCount

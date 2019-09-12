@@ -25,7 +25,7 @@
 #if HAS_HEATED_BED
 
 #include "../gcode.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 #include "../../module/motion.h"
 #include "../../lcd/ultralcd.h"
 

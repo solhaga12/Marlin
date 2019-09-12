@@ -25,7 +25,7 @@
 #if ENABLED(PIDTEMPBED)
 
 #include "../gcode.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 void GcodeSuite::M304() {
   if (parser.seen('P')) thermalManager.temp_bed.pid.Kp = parser.value_float();

@@ -23,16 +23,14 @@
 #include "utility.h"
 
 #include "../Marlin.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 
 void safe_delay(millis_t ms) {
   while (ms > 50) {
     ms -= 50;
     delay(50);
-    thermalManager.manage_heater();
   }
   delay(ms);
-  thermalManager.manage_heater(); // This keeps us safe if too many small safe_delay() calls are made
 }
 
 #if ENABLED(DEBUG_LEVELING_FEATURE)

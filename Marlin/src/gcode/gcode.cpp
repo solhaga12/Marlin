@@ -66,39 +66,6 @@ bool GcodeSuite::axis_relative_modes[] = AXIS_RELATIVE_MODES;
 #endif
 
 /**
- * Get the target extruder from the T parameter or the active_extruder
- * Return -1 if the T parameter is out of range
- */
-int8_t GcodeSuite::get_target_extruder_from_command() {
-  if (parser.seenval('T')) {
-    const int8_t e = parser.value_byte();
-    if (e < EXTRUDERS) return e;
-    SERIAL_ECHO_START();
-    SERIAL_CHAR('M'); SERIAL_ECHO(parser.codenum);
-    SERIAL_ECHOLNPAIR(" " MSG_INVALID_EXTRUDER " ", int(e));
-    return -1;
-  }
-  return active_extruder;
-}
-
-/**
- * Get the target e stepper from the T parameter
- * Return -1 if the T parameter is out of range or unspecified
- */
-int8_t GcodeSuite::get_target_e_stepper_from_command() {
-  const int8_t e = parser.intval('T', -1);
-  if (WITHIN(e, 0, E_STEPPERS - 1)) return e;
-
-  SERIAL_ECHO_START();
-  SERIAL_CHAR('M'); SERIAL_ECHO(parser.codenum);
-  if (e == -1)
-    SERIAL_ECHOLNPGM(" " MSG_E_STEPPER_NOT_SPECIFIED);
-  else
-    SERIAL_ECHOLNPAIR(" " MSG_INVALID_E_STEPPER " ", int(e));
-  return -1;
-}
-
-/**
  * Set XYZE destination and feedrate from the current GCode command
  *
  *  - Set destination from included axis codes
@@ -396,8 +363,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 100: M100(); break;                                  // M100: Free Memory Report
       #endif
 
-      case 104: M104(); break;                                    // M104: Set hot end temperature
-      case 109: M109(); break;                                    // M109: Wait for hotend temperature to reach target
       case 110: M110(); break;                                    // M110: Set Current Line Number
       case 111: M111(); break;                                    // M111: Set debug level
 
@@ -420,55 +385,15 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 113: M113(); break;                                  // M113: Set Host Keepalive interval
       #endif
 
-      #if HAS_HEATED_BED
-        case 140: M140(); break;                                  // M140: Set bed temperature
-        case 190: M190(); break;                                  // M190: Wait for bed temperature to reach target
-      #endif
-
-      #if HAS_HEATED_CHAMBER
-        case 141: M141(); break;                                  // M141: Set chamber temperature
-        //case 191: M191(); break;                                // M191: Wait for chamber temperature to reach target
-      #endif
-
-      case 105: M105(); return;                                   // M105: Report Temperatures (and say "ok")
-
-      #if ENABLED(AUTO_REPORT_TEMPERATURES) && HAS_TEMP_SENSOR
-        case 155: M155(); break;                                  // M155: Set temperature auto-report interval
-      #endif
-
-      #if FAN_COUNT > 0
-        case 106: M106(); break;                                  // M106: Fan On
-        case 107: M107(); break;                                  // M107: Fan Off
-      #endif
-
       #if ENABLED(PARK_HEAD_ON_PAUSE)
         case 125: M125(); break;                                  // M125: Store current position and move to filament change position
       #endif
 
-      #if ENABLED(BARICUDA)
-        // PWM for HEATER_1_PIN
-        #if HAS_HEATER_1
-          case 126: M126(); break;                                // M126: valve open
-          case 127: M127(); break;                                // M127: valve closed
-        #endif
-
-        // PWM for HEATER_2_PIN
-        #if HAS_HEATER_2
-          case 128: M128(); break;                                // M128: valve open
-          case 129: M129(); break;                                // M129: valve closed
-        #endif
-      #endif // BARICUDA
-
-      #if HAS_POWER_SWITCH
-        case 80: M80(); break;                                    // M80: Turn on Power Supply
-      #endif
-      case 81: M81(); break;                                      // M81: Turn off Power, including Power Supply, if possible
 
       case 82: M82(); break;                                      // M82: Set E axis normal mode (same as other axes)
       case 83: M83(); break;                                      // M83: Set E axis relative mode
       case 18: case 84: M18_M84(); break;                         // M18/M84: Disable Steppers / Set Timeout
       case 85: M85(); break;                                      // M85: Set inactivity stepper shutdown timeout
-      case 92: M92(); break;                                      // M92: Set the steps-per-unit for one or more axes
       case 114: M114(); break;                                    // M114: Report current position
       case 115: M115(); break;                                    // M115: Report capabilities
       case 117: M117(); break;                                    // M117: Set LCD message text, if possible
@@ -481,36 +406,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 145: M145(); break;                                  // M145: Set material heatup parameters
       #endif
 
-      #if ENABLED(TEMPERATURE_UNITS_SUPPORT)
-        case 149: M149(); break;                                  // M149: Set temperature units
-      #endif
-
-      #if HAS_COLOR_LEDS
-        case 150: M150(); break;                                  // M150: Set Status LED Color
-      #endif
-
-      #if ENABLED(MIXING_EXTRUDER)
-        case 163: M163(); break;                                  // M163: Set a component weight for mixing extruder
-        case 164: M164(); break;                                  // M164: Save current mix as a virtual extruder
-        #if ENABLED(DIRECT_MIXING_IN_G1)
-          case 165: M165(); break;                                // M165: Set multiple mix weights
-        #endif
-        #if ENABLED(GRADIENT_MIX)
-          case 166: M166(); break;                                // M166: Set Gradient Mix
-        #endif
-      #endif
-
-      #if DISABLED(NO_VOLUMETRICS)
-        case 200: M200(); break;                                  // M200: Set filament diameter, E to cubic units
-      #endif
-
-      case 201: M201(); break;                                    // M201: Set max acceleration for print moves (units/s^2)
-
-      #if 0
-        case 202: M202(); break;                                  // M202: Not used for Sprinter/grbl gen6
-      #endif
-
-      case 203: M203(); break;                                    // M203: Set max feedrate (units/sec)
       case 204: M204(); break;                                    // M204: Set acceleration
       case 205: M205(); break;                                    // M205: Set advanced settings
 
@@ -549,15 +444,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       case 220: M220(); break;                                    // M220: Set Feedrate Percentage: S<percent> ("FR" on your LCD)
-      case 221: M221(); break;                                    // M221: Set Flow Percentage
       case 226: M226(); break;                                    // M226: Wait until a pin reaches a state
-
-      #if HAS_SERVOS
-        case 280: M280(); break;                                  // M280: Set servo position absolute
-        #if ENABLED(EDITABLE_SERVO_ANGLES)
-          case 281: M281(); break;                                // M281: Set servo angles
-        #endif
-      #endif
 
       #if ENABLED(BABYSTEPPING)
         case 290: M290(); break;                                  // M290: Babystepping
@@ -790,8 +677,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       default: parser.unknown_command_error(); break;
     }
     break;
-
-    case 'T': T(parser.codenum); break;                           // Tn: Tool Change
 
     default: parser.unknown_command_error();
   }

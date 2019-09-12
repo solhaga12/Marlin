@@ -32,7 +32,7 @@
 
 #include "probe.h"
 #include "motion.h"
-#include "temperature.h"
+#include "voltages.h"
 #include "endstops.h"
 
 #include "../gcode/gcode.h"

@@ -33,9 +33,7 @@
 #include "../../lcd/ultralcd.h"
 #include "../../module/motion.h"
 #include "../../module/planner.h"
-#include "../../module/tool_change.h"
 #include "../../module/endstops.h"
-#include "../../feature/bedlevel/bedlevel.h"
 
 /**
  * G425 backs away from the calibration object by various distances

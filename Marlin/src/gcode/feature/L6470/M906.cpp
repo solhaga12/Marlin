@@ -182,30 +182,6 @@ void GcodeSuite::M906() {
           if (index == 2) L6470_SET_KVAL_HOLD(Z3);
         #endif
         break;
-      case E_AXIS: {
-        const int8_t target_extruder = get_target_extruder_from_command();
-        if (target_extruder < 0) return;
-        switch (target_extruder) {
-          #if AXIS_DRIVER_TYPE_E0(L6470)
-            case 0: L6470_SET_KVAL_HOLD(E0); break;
-          #endif
-          #if AXIS_DRIVER_TYPE_E1(L6470)
-            case 1: L6470_SET_KVAL_HOLD(E1); break;
-          #endif
-          #if AXIS_DRIVER_TYPE_E2(L6470)
-            case 2: L6470_SET_KVAL_HOLD(E2); break;
-          #endif
-          #if AXIS_DRIVER_TYPE_E3(L6470)
-            case 3: L6470_SET_KVAL_HOLD(E3); break;
-          #endif
-          #if AXIS_DRIVER_TYPE_E4(L6470)
-            case 4: L6470_SET_KVAL_HOLD(E4); break;
-          #endif
-          #if AXIS_DRIVER_TYPE_E5(L6470)
-            case 5: L6470_SET_KVAL_HOLD(E5); break;
-          #endif
-        }
-      } break;
     }
   }
 

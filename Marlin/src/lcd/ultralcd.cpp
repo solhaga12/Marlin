@@ -73,7 +73,7 @@
 #include "lcdprint.h"
 
 #include "../sd/cardreader.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 #include "../module/planner.h"
 #include "../module/printcounter.h"
 #include "../module/motion.h"
@@ -1083,21 +1083,6 @@ void MarlinUI::update() {
     {  ADC_BUTTON_VALUE(ADC_BUTTONS_MIDDLE_R_PULLDOWN) - 100,
        ADC_BUTTON_VALUE(ADC_BUTTONS_MIDDLE_R_PULLDOWN) + 100, 1 + BLEN_KEYPAD_MIDDLE }, // ENTER (1205 ... 1405)
   };
-
-  uint8_t get_ADC_keyValue(void) {
-    if (thermalManager.ADCKey_count >= 16) {
-      const uint16_t currentkpADCValue = thermalManager.current_ADCKey_raw << 2;
-      thermalManager.current_ADCKey_raw = 1024;
-      thermalManager.ADCKey_count = 0;
-      if (currentkpADCValue < 4000)
-        for (uint8_t i = 0; i < ADC_KEY_NUM; i++) {
-          const uint16_t lo = pgm_read_word(&stADCKeyTable[i].ADCKeyValueMin),
-                         hi = pgm_read_word(&stADCKeyTable[i].ADCKeyValueMax);
-          if (WITHIN(currentkpADCValue, lo, hi)) return pgm_read_byte(&stADCKeyTable[i].ADCKeyNo);
-        }
-    }
-    return 0;
-  }
 
 #endif // HAS_ADC_BUTTONS
 

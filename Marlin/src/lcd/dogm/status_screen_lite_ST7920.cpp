@@ -53,7 +53,7 @@
 #include "../../libs/duration_t.h"
 #include "../../module/motion.h"
 #include "../../module/printcounter.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 #if ENABLED(SDSUPPORT)
   #include "../../sd/cardreader.h"

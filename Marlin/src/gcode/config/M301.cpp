@@ -25,7 +25,7 @@
 #if ENABLED(PIDTEMP)
 
 #include "../gcode.h"
-#include "../../module/temperature.h"
+#include "../../module/voltages.h"
 
 /**
  * M301: Set PID parameters P I D (and optionally C, L)

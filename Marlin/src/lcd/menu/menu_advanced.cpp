@@ -40,7 +40,7 @@
 #endif
 
 #if ENABLED(PIDTEMP)
-  #include "../../module/temperature.h"
+  #include "../../module/voltages.h"
 #endif
 
 #ifdef FILAMENT_RUNOUT_DISTANCE_MM

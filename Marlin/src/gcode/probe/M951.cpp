@@ -25,7 +25,6 @@
 #if ENABLED(MAGNETIC_PARKING_EXTRUDER)
 
 #include "../gcode.h"
-#include "../../module/tool_change.h"
 #include "../../module/motion.h"
 
 

@@ -27,18 +27,6 @@
 #include "../../module/stepper.h"
 #include "../../module/endstops.h"
 
-#if HOTENDS > 1
-  #include "../../module/tool_change.h"
-#endif
-
-#if HAS_LEVELING
-  #include "../../feature/bedlevel/bedlevel.h"
-#endif
-
-#if ENABLED(SENSORLESS_HOMING)
-  #include "../../feature/tmc_util.h"
-#endif
-
 #if HOMING_Z_WITH_PROBE || ENABLED(BLTOUCH)
   #include "../../module/probe.h"
 #endif

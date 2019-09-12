@@ -37,7 +37,7 @@
 #include "module/stepper.h"
 #include "module/endstops.h"
 #include "module/probe.h"
-#include "module/temperature.h"
+#include "module/voltages.h"
 #include "sd/cardreader.h"
 #include "module/configuration_store.h"
 #include "module/printcounter.h" // PrintCounter or Stopwatch
@@ -51,7 +51,6 @@
   #include <pins_arduino.h>
 #endif
 #include <math.h>
-#include "libs/nozzle.h"
 
 #include "gcode/gcode.h"
 #include "gcode/parser.h"
@@ -155,18 +154,6 @@
 
 #if HAS_FANMUX
   #include "feature/fanmux.h"
-#endif
-
-#if DO_SWITCH_EXTRUDER || ANY(SWITCHING_NOZZLE, PARKING_EXTRUDER, MAGNETIC_PARKING_EXTRUDER, ELECTROMAGNETIC_SWITCHING_TOOLHEAD)
-  #include "module/tool_change.h"
-#endif
-
-#if ENABLED(USE_CONTROLLER_FAN)
-  #include "feature/controllerfan.h"
-#endif
-
-#if ENABLED(PRUSA_MMU2)
-  #include "feature/prusa_MMU2/mmu2.h"
 #endif
 
 #if ENABLED(EXTENSIBLE_UI)
@@ -531,86 +518,6 @@ void manage_inactivity(const bool ignore_stepper_queue/*=false*/) {
     powerManager.check();
   #endif
 
-  #if ENABLED(EXTRUDER_RUNOUT_PREVENT)
-    if (thermalManager.degHotend(active_extruder) > EXTRUDER_RUNOUT_MINTEMP
-      && ELAPSED(ms, gcode.previous_move_ms + (EXTRUDER_RUNOUT_SECONDS) * 1000UL)
-      && !planner.has_blocks_queued()
-    ) {
-      #if ENABLED(SWITCHING_EXTRUDER)
-        bool oldstatus;
-        switch (active_extruder) {
-          default: oldstatus = E0_ENABLE_READ; enable_E0(); break;
-          #if E_STEPPERS > 1
-            case 2: case 3: oldstatus = E1_ENABLE_READ; enable_E1(); break;
-            #if E_STEPPERS > 2
-              case 4: case 5: oldstatus = E2_ENABLE_READ; enable_E2(); break;
-            #endif // E_STEPPERS > 2
-          #endif // E_STEPPERS > 1
-        }
-      #else // !SWITCHING_EXTRUDER
-        bool oldstatus;
-        switch (active_extruder) {
-          default: oldstatus = E0_ENABLE_READ; enable_E0(); break;
-          #if E_STEPPERS > 1
-            case 1: oldstatus = E1_ENABLE_READ; enable_E1(); break;
-            #if E_STEPPERS > 2
-              case 2: oldstatus = E2_ENABLE_READ; enable_E2(); break;
-              #if E_STEPPERS > 3
-                case 3: oldstatus = E3_ENABLE_READ; enable_E3(); break;
-                #if E_STEPPERS > 4
-                  case 4: oldstatus = E4_ENABLE_READ; enable_E4(); break;
-                  #if E_STEPPERS > 5
-                    case 5: oldstatus = E5_ENABLE_READ; enable_E5(); break;
-                  #endif // E_STEPPERS > 5
-                #endif // E_STEPPERS > 4
-              #endif // E_STEPPERS > 3
-            #endif // E_STEPPERS > 2
-          #endif // E_STEPPERS > 1
-        }
-      #endif // !SWITCHING_EXTRUDER
-
-      const float olde = current_position[E_AXIS];
-      current_position[E_AXIS] += EXTRUDER_RUNOUT_EXTRUDE;
-      planner.buffer_line(current_position, MMM_TO_MMS(EXTRUDER_RUNOUT_SPEED), active_extruder);
-      current_position[E_AXIS] = olde;
-      planner.set_e_position_mm(olde);
-      planner.synchronize();
-
-      #if ENABLED(SWITCHING_EXTRUDER)
-        switch (active_extruder) {
-          default: oldstatus = E0_ENABLE_WRITE(oldstatus); break;
-          #if E_STEPPERS > 1
-            case 2: case 3: oldstatus = E1_ENABLE_WRITE(oldstatus); break;
-            #if E_STEPPERS > 2
-              case 4: case 5: oldstatus = E2_ENABLE_WRITE(oldstatus); break;
-            #endif // E_STEPPERS > 2
-          #endif // E_STEPPERS > 1
-        }
-      #else // !SWITCHING_EXTRUDER
-        switch (active_extruder) {
-          case 0: E0_ENABLE_WRITE(oldstatus); break;
-          #if E_STEPPERS > 1
-            case 1: E1_ENABLE_WRITE(oldstatus); break;
-            #if E_STEPPERS > 2
-              case 2: E2_ENABLE_WRITE(oldstatus); break;
-              #if E_STEPPERS > 3
-                case 3: E3_ENABLE_WRITE(oldstatus); break;
-                #if E_STEPPERS > 4
-                  case 4: E4_ENABLE_WRITE(oldstatus); break;
-                  #if E_STEPPERS > 5
-                    case 5: E5_ENABLE_WRITE(oldstatus); break;
-                  #endif // E_STEPPERS > 5
-                #endif // E_STEPPERS > 4
-              #endif // E_STEPPERS > 3
-            #endif // E_STEPPERS > 2
-          #endif // E_STEPPERS > 1
-        }
-      #endif // !SWITCHING_EXTRUDER
-
-      gcode.reset_stepper_timeout();
-    }
-  #endif // EXTRUDER_RUNOUT_PREVENT
-
   #if ENABLED(DUAL_X_CARRIAGE)
     // handle delayed move timeout
     if (delayed_move_time && ELAPSED(ms, delayed_move_time + 1000UL) && IsRunning()) {
@@ -675,8 +582,6 @@ void idle(
     #endif
   );
 
-  thermalManager.manage_heater();
-
   #if ENABLED(PRINTCOUNTER)
     print_job_timer.tick();
   #endif
@@ -697,17 +602,6 @@ void idle(
     HAL_idletask();
   #endif
 
-  #if HAS_AUTO_REPORTING
-    if (!suspend_auto_report) {
-      #if ENABLED(AUTO_REPORT_TEMPERATURES)
-        thermalManager.auto_report_temperatures();
-      #endif
-      #if ENABLED(AUTO_REPORT_SD_STATUS)
-        card.auto_report_sd_status();
-      #endif
-    }
-  #endif
-
   #if ENABLED(USB_FLASH_DRIVE_SUPPORT)
     Sd2Card::idle();
   #endif
@@ -722,7 +616,6 @@ void idle(
  * After this the machine will need to be reset.
  */
 void kill(PGM_P const lcd_msg/*=nullptr*/) {
-  thermalManager.disable_all_heaters();
 
   SERIAL_ERROR_MSG(MSG_ERR_KILLED);
 
@@ -748,8 +641,6 @@ void minkill() {
 
   // Wait to ensure all interrupts stopped
   for (int i = 1000; i--;) DELAY_US(250);
-
-  thermalManager.disable_all_heaters(); // turn off heaters again
 
   #if HAS_POWER_SWITCH
     PSU_OFF();
@@ -794,12 +685,7 @@ void minkill() {
  * After a stop the machine may be resumed with M999
  */
 void stop() {
-  thermalManager.disable_all_heaters(); // 'unpause' taken care of in here
   print_job_timer.stop();
-
-  #if ENABLED(PROBING_FANS_OFF)
-    if (thermalManager.fans_paused) thermalManager.set_fans_paused(false); // put things back the way they were
-  #endif
 
   if (IsRunning()) {
     queue.stop();
@@ -935,10 +821,6 @@ void setup() {
   ui.init();
   ui.reset_status();
 
-  #if HAS_SPI_LCD && ENABLED(SHOW_BOOTSCREEN)
-    ui.show_bootscreen();
-  #endif
-
   #if ENABLED(SDIO_SUPPORT) && !PIN_EXISTS(SD_DETECT)
     // Auto-mount the SD for EEPROM.dat emulation
     if (!card.isDetected()) card.initsd();
@@ -960,7 +842,9 @@ void setup() {
   // Vital to init stepper/planner equivalent for current_position
   sync_plan_position();
 
-  thermalManager.init();    // Initialize temperature loop
+  Voltage voltageManager = Voltage();
+  voltageManager.init();    // Initialize voltage loop
+
 
   print_job_timer.init();   // Initial setup of print job timer
 
@@ -1141,11 +1025,6 @@ void loop() {
         queue.clear();
         quickstop_stepper();
         print_job_timer.stop();
-        #if DISABLED(SD_ABORT_NO_COOLDOWN)
-          thermalManager.disable_all_heaters();
-        #endif
-        thermalManager.zero_fan_speeds();
-        wait_for_heatup = false;
         #if ENABLED(POWER_LOSS_RECOVERY)
           card.removeJobRecoveryFile();
         #endif

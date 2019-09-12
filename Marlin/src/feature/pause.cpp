@@ -35,7 +35,7 @@
 #include "../module/planner.h"
 #include "../module/stepper.h"
 #include "../module/printcounter.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 
 #if ENABLED(FWRETRACT)
   #include "fwretract.h"

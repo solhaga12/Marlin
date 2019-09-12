@@ -32,7 +32,7 @@ GCodeQueue queue;
 #include "../lcd/ultralcd.h"
 #include "../sd/cardreader.h"
 #include "../module/planner.h"
-#include "../module/temperature.h"
+#include "../module/voltages.h"
 #include "../Marlin.h"
 
 #if ENABLED(PRINTER_EVENT_LEDS)
@@ -535,7 +535,8 @@ inline int read_serial(const uint8_t index) {
 
 #endif // BINARY_FILE_TRANSFER
 
-void GCodeQueue::gcode_line_error(PGM_P const err, const int8_t port) {
+void GCodeQueue::gcode_line_error(PGM_P const err, const int8_t port)
+    {
   PORT_REDIRECT(port);
   SERIAL_ERROR_START();
   serialprintPGM(err);
@@ -608,7 +609,7 @@ void GCodeQueue::get_serial_commands() {
         #endif
 
         // Skip empty lines and comments
-        if (!serial_count[i]) { thermalManager.manage_heater(); continue; }
+        if (!serial_count[i]) { continue; }
 
         serial_line_buffer[i][serial_count[i]] = 0;       // Terminate string
         serial_count[i] = 0;                              // Reset buffer
@@ -796,7 +797,7 @@ void GCodeQueue::get_serial_commands() {
         #endif
 
         // Skip empty lines and comments
-        if (!sd_count) { thermalManager.manage_heater(); continue; }
+        if (!sd_count) { continue; }
 
         buffer[index_w][sd_count] = '\0'; // terminate string
         sd_count = 0; // clear sd line buffer
