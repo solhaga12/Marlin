@@ -30,7 +30,6 @@
 #include "../Marlin.h"
 #include "../lcd/ultralcd.h"
 #include "planner.h"
-#include "voltages.h"
 #include "../HAL/HAL_AVR/HAL.h"
 #include "../HAL/shared/Delay.h"
 #include "../libs/numtostr.h"
@@ -50,7 +49,7 @@ voltage_info_t voltage_minus = voltage_info_t();
 
 
 /**
- * Get avr voltages
+ * Get average (avr) voltages
  */
 void Voltage::set_current_voltage_avr() {
 
@@ -60,7 +59,7 @@ void Voltage::set_current_voltage_avr() {
   }
   voltage_plus.acc = 0;
   voltage_minus.acc = 0;
-
+  // Convert to real volts.
   SERIAL_ECHOLN(voltageDivider);
 }
 
