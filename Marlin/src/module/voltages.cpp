@@ -44,28 +44,36 @@ Voltage voltageManager;
 
 Voltage::Voltage() { }
 
-voltage_info_t voltage_plus = voltage_info_t();
-voltage_info_t voltage_minus = voltage_info_t();
+VoltageInfo Voltage::voltage_minus = VoltageInfo();
+VoltageInfo Voltage::voltage_plus = VoltageInfo();
 
+uint16_t Voltage::voltageDivider = uint16_t();
+float Voltage::voltageReal = float();
 
 /**
  * Get average (avr) voltages
  */
 void Voltage::set_current_voltage_avr() {
 
-  voltageDivider = (voltage_plus.acc - voltage_minus.acc)/OVERSAMPLENR;
-  if (voltageDivider < 0) {
+   voltageDivider = (voltage_plus.acc - voltage_minus.acc)/OVERSAMPLENR;
+  if (voltageDivider > 1024) {
 	  voltageDivider = 0;
   }
+  // SERIAL_ECHO(voltage_plus.acc/OVERSAMPLENR);
+  // SERIAL_ECHO(" ");
+  // SERIAL_ECHO(voltage_minus.acc/OVERSAMPLENR);
+  // SERIAL_ECHO(" ");
+  // SERIAL_ECHOLN(voltageDivider);
   voltage_plus.acc = 0;
   voltage_minus.acc = 0;
   // Convert to real volts.
-  SERIAL_ECHOLN(voltageDivider);
+  voltageReal = (voltageDivider - 35)/4.85;
+  SERIAL_ECHOLN(voltageReal);
 }
 
-uint16_t Voltage::getVoltage() {
+float Voltage::getVoltage() {
 
-	return voltageDivider;
+	return voltageReal;
 }
 
 /**

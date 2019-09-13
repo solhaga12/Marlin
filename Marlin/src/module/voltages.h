@@ -62,13 +62,14 @@ class Voltage {
 
   public:
 
-    static uint16_t getVoltage();
+    static float getVoltage();
 
   private:
 
     static voltage_info_t voltage_plus;
     static voltage_info_t voltage_minus;
     static uint16_t voltageDivider;
+    static float voltageReal;
 
   public:
     /**

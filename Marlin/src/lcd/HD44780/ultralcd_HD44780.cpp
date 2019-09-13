@@ -528,7 +528,9 @@ void MarlinUI::draw_status_screen() {
 
   // Show current/set Divider Voltage
 
-  lcd_put_u8str(ui16tostr4(Voltage::getVoltage()));
+  lcd_put_u8str(ftostr52(Voltage::getVoltage()));
+  lcd_moveto(0, 7);
+  lcd_put_wchar('V');
 
     // ========== Line 2 ==========
 
