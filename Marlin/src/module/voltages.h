@@ -56,7 +56,7 @@ typedef struct VoltageInfo {
   uint16_t avr;
 } voltage_info_t;
 
-#define OVERSAMPLENR 16
+#define OVERSAMPLENR 4
 
 class Voltage {
 
