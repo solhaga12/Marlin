@@ -519,8 +519,9 @@ void MarlinUI::draw_status_screen() {
 
   //const bool blink = get_blink();
   const bool blink = true;  // Don't blink when not auto squared
-  lcd_moveto(0, 0);
+  char buffer[14];
 
+  lcd_moveto(0, 0);
 
     // ========== Line 1 ==========
     // Show Status(Off, Start (start plasma) and Transfer (start machine motion)
@@ -534,13 +535,14 @@ void MarlinUI::draw_status_screen() {
   lcd_put_wchar(' ');
   lcd_put_u8str(ui16tostr3(Voltage::getActualThcVoltage()));
   lcd_put_wchar(' ');
-  lcd_put_wchar('(');
-  lcd_put_u8str(ui16tostr3(Voltage::getWantedThcVoltage()));
-  lcd_put_wchar(')');
-  lcd_put_wchar(' ');
   if (Voltage::getActualThcVoltage() == Voltage::getWantedThcVoltage()) lcd_put_wchar('=');
-  if (Voltage::getActualThcVoltage() < Voltage::getWantedThcVoltage()) lcd_put_wchar('U');
-  if (Voltage::getActualThcVoltage() > Voltage::getWantedThcVoltage()) lcd_put_wchar('D');
+  else if (Voltage::getActualThcVoltage() < Voltage::getWantedThcVoltage()) lcd_put_wchar('<');
+  else if (Voltage::getActualThcVoltage() > Voltage::getWantedThcVoltage()) lcd_put_wchar('>');
+  lcd_put_wchar(' ');
+  lcd_put_u8str(ui16tostr3(Voltage::getWantedThcVoltage()));
+
+
+
 
 
     // ========== Line 2 ==========
@@ -557,13 +559,8 @@ void MarlinUI::draw_status_screen() {
 
   lcd_moveto(0, 2);
 
-  // Remove this later
-  // Put something else here
-  // lcd_put_wchar(LCD_STR_FEEDRATE[0]);
-  // lcd_put_u8str(i16tostr3(feedrate_percentage));
-  // lcd_put_wchar('%');
+  // Put Plasma status here. Idle, Start, Transfer and Cutting
 
-  char buffer[14];
   duration_t elapsed = print_job_timer.duration();
   const uint8_t len = elapsed.toDigital(buffer),
                     timepos = LCD_WIDTH - len - 1;
