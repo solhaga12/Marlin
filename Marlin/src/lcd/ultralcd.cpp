@@ -21,6 +21,7 @@
  */
 
 #include "../inc/MarlinConfigPre.h"
+#include "../core/serial.h"
 
 #ifdef LED_BACKLIGHT_TIMEOUT
   #include "../feature/leds/leds.h"
@@ -545,6 +546,7 @@ void MarlinUI::status_screen() {
     const int16_t old_frm = feedrate_percentage;
           int16_t new_frm = old_frm + int16_t(encoderPosition);
 
+    SERIAL_ECHOPAIR("F enc ", encoderPosition);
     // Dead zone at 100% feedrate
     if (old_frm == 100) {
       if (int16_t(encoderPosition) > ENCODER_FEEDRATE_DEADZONE)
@@ -562,19 +564,34 @@ void MarlinUI::status_screen() {
     if (old_frm != new_frm) {
       feedrate_percentage = new_frm;
       encoderPosition = 0;
-      #if ENABLED(BEEP_ON_FEEDRATE_CHANGE)
-        static millis_t next_beep;
-        #ifndef GOT_MS
-          const millis_t ms = millis();
-        #endif
-        if (ELAPSED(ms, next_beep)) {
-          BUZZ(FEEDRATE_CHANGE_BEEP_DURATION, FEEDRATE_CHANGE_BEEP_FREQUENCY);
-          next_beep = ms + 500UL;
-        }
-      #endif
     }
 
   #endif // ULTIPANEL_FEEDMULTIPLY
+
+#if ENABLED(ULTIPANEL_WANTED_THC_VOLTAGE)
+
+  const int16_t old_thc = Voltage::getWantedThcVoltage();
+        int16_t new_thc = old_thc + int16_t(encoderPosition);
+
+  // Dead zone at 100 V
+  if (old_thc == 100) {
+    if (int16_t(encoderPosition) > ENCODER_THC_DEADZONE)
+      new_thc -= ENCODER_THC_DEADZONE;
+    else if (int16_t(encoderPosition) < -(ENCODER_THC_DEADZONE))
+      new_thc += ENCODER_THC_DEADZONE;
+    else
+      new_thc = old_thc;
+  }
+  else if ((old_thc < 100 && new_thc > 100) || (old_thc > 100 && new_thc < 100))
+    new_thc = 100;
+
+  LIMIT(new_thc, 50, 200);
+
+  if (old_thc != new_thc) {
+    Voltage::setWantedThcVoltage(new_thc);
+    encoderPosition = 0;
+  }
+#endif // ULTIPANEL_WANTED_THC_VOLTAGE
 
   draw_status_screen();
 }

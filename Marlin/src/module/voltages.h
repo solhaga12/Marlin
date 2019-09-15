@@ -58,14 +58,17 @@ class Voltage {
 
   public:
 
-    static float getVoltage();
+    static uint16_t getActualThcVoltage();
+    static uint16_t getWantedThcVoltage();
+    static void setWantedThcVoltage(uint16_t voltage);
 
   private:
 
     static voltage_info_t voltage_plus;
     static voltage_info_t voltage_minus;
     static uint16_t voltageDivider;
-    static float voltageReal;
+    static uint16_t voltageReal;
+    static uint16_t wantedThcVoltage;
 
   public:
     /**
@@ -91,6 +94,8 @@ class Voltage {
       HAL_timer_start(VOLTAGE_TIMER_NUM, VOLTAGE_TIMER_FREQUENCY);
       SERIAL_ECHOLN(VOLTAGE_TIMER_FREQUENCY);
       ENABLE_VOLTAGE_INTERRUPT();
+
+      wantedThcVoltage = 100;
     }
 
     /**

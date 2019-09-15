@@ -49,7 +49,8 @@ VoltageInfo Voltage::voltage_minus = VoltageInfo();
 VoltageInfo Voltage::voltage_plus = VoltageInfo();
 
 uint16_t Voltage::voltageDivider = uint16_t();
-float Voltage::voltageReal = float();
+uint16_t Voltage::voltageReal = uint16_t();
+uint16_t Voltage::wantedThcVoltage = uint16_t();
 
 /**
  * Get average (avr) voltages
@@ -70,9 +71,17 @@ void Voltage::set_current_voltage_avr() {
   // SERIAL_ECHOLN(voltageReal);
 }
 
-float Voltage::getVoltage() {
+uint16_t Voltage::getActualThcVoltage() {
 
 	return voltageReal;
+}
+
+uint16_t Voltage::getWantedThcVoltage() {
+  return wantedThcVoltage;
+}
+
+void Voltage::setWantedThcVoltage(uint16_t voltage_) {
+  wantedThcVoltage = voltage_;
 }
 
 /**

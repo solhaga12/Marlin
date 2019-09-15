@@ -528,9 +528,20 @@ void MarlinUI::draw_status_screen() {
 
   // Show current/set Divider Voltage
 
-  lcd_put_u8str(ftostr52(Voltage::getVoltage()));
-  lcd_moveto(7, 0);
-  lcd_put_wchar('V');
+  lcd_put_wchar('T');
+  lcd_put_wchar('H');
+  lcd_put_wchar('C');
+  lcd_put_wchar(' ');
+  lcd_put_u8str(ui16tostr3(Voltage::getActualThcVoltage()));
+  lcd_put_wchar(' ');
+  lcd_put_wchar('(');
+  lcd_put_u8str(ui16tostr3(Voltage::getWantedThcVoltage()));
+  lcd_put_wchar(')');
+  lcd_put_wchar(' ');
+  if (Voltage::getActualThcVoltage() == Voltage::getWantedThcVoltage()) lcd_put_wchar('=');
+  if (Voltage::getActualThcVoltage() < Voltage::getWantedThcVoltage()) lcd_put_wchar('U');
+  if (Voltage::getActualThcVoltage() > Voltage::getWantedThcVoltage()) lcd_put_wchar('D');
+
 
     // ========== Line 2 ==========
 
@@ -545,9 +556,12 @@ void MarlinUI::draw_status_screen() {
     // ========== Line 3 ==========
 
   lcd_moveto(0, 2);
-  lcd_put_wchar(LCD_STR_FEEDRATE[0]);
-  lcd_put_u8str(i16tostr3(feedrate_percentage));
-  lcd_put_wchar('%');
+
+  // Remove this later
+  // Put something else here
+  // lcd_put_wchar(LCD_STR_FEEDRATE[0]);
+  // lcd_put_u8str(i16tostr3(feedrate_percentage));
+  // lcd_put_wchar('%');
 
   char buffer[14];
   duration_t elapsed = print_job_timer.duration();
