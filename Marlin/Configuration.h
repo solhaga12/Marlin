@@ -1699,6 +1699,7 @@
 
 #define PLASMA_START_PIN  63 // Plasma start relay, output
 #define PLASMA_TRANSFER_PIN 40	// Plasma transfer, input
+#define PLASMA_VD_UPDATES_PIN 42     // Plasma update Voltage Divider, output
 
 #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
 #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.

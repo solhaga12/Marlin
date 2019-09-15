@@ -517,17 +517,14 @@ void MarlinUI::draw_status_message(const bool blink) {
 
 void MarlinUI::draw_status_screen() {
 
-  //const bool blink = get_blink();
   const bool blink = true;  // Don't blink when not auto squared
   char buffer[14];
 
   lcd_moveto(0, 0);
 
     // ========== Line 1 ==========
-    // Show Status(Off, Start (start plasma) and Transfer (start machine motion)
-  //lcd_put_u8str("Status");
 
-  // Show current/set Divider Voltage
+  // Show actual/wanted Divider Voltage
 
   lcd_put_wchar('T');
   lcd_put_wchar('H');
@@ -540,10 +537,6 @@ void MarlinUI::draw_status_screen() {
   else if (Voltage::getActualThcVoltage() > Voltage::getWantedThcVoltage()) lcd_put_wchar('>');
   lcd_put_wchar(' ');
   lcd_put_u8str(ui16tostr3(Voltage::getWantedThcVoltage()));
-
-
-
-
 
     // ========== Line 2 ==========
 

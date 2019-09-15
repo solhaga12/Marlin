@@ -142,7 +142,7 @@ void Voltage::isr() {
       sample_count++;
       if (sample_count >= OVERSAMPLENR) {
         sample_count = 0;
-        TOGGLE(PLASMA_START_PIN);
+        TOGGLE(PLASMA_VD_UPDATES_PIN); // To see the sample time on an oscilloscope.
         Voltage::set_current_voltage_avr();
       }
       adc_sensor_state = MeasureVoltagePlus;
@@ -163,4 +163,8 @@ void Voltage::isr() {
 
   // Periodically call the planner timer
   planner.tick();
+
+  // Test Transfer pin 40
+  // SERIAL_ECHOLN(READ(PLASMA_TRANSFER_PIN));
+
 }

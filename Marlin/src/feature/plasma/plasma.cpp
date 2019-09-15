@@ -9,6 +9,7 @@ bool Plasma::stop_pending = false;
 void Plasma::init()
 {
 	SET_OUTPUT(PLASMA_START_PIN);
+	SET_OUTPUT(PLASMA_VD_UPDATES_PIN);
 	SET_INPUT_PULLUP(PLASMA_TRANSFER_PIN);
   stop();
 }
