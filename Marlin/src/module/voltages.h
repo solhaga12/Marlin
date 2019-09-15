@@ -33,22 +33,18 @@
  * States for ADC reading in the ISR
  */
 enum ADCSensorState : char {
-  StartupDelay,
-  PrepareVoltagePlus,
   MeasureVoltagePlus,
-  PrepareVoltageMinus,
-  MeasureVoltageMinus,
-  AverageVoltage
+  MeasureVoltageMinus
 };
 
 // Minimum number of Voltage::ISR loops between sensor readings.
 // Multiplied by 16 (OVERSAMPLENR) to obtain the total time to
 // get all oversampled sensor readings
-#define MIN_ADC_ISR_LOOPS 10
+// #define MIN_ADC_ISR_LOOPS 10
 
-#define ACTUAL_ADC_SAMPLES _MAX(int(MIN_ADC_ISR_LOOPS), int(SensorsReady))
+// #define ACTUAL_ADC_SAMPLES _MAX(int(MIN_ADC_ISR_LOOPS), int(SensorsReady))
 
-#define G26_CLICK_CAN_CANCEL (HAS_LCD_MENU && ENABLED(G26_MESH_VALIDATION))
+// #define G26_CLICK_CAN_CANCEL (HAS_LCD_MENU && ENABLED(G26_MESH_VALIDATION))
 
 // A voltage sensor
 typedef struct VoltageInfo {
@@ -56,7 +52,7 @@ typedef struct VoltageInfo {
   uint16_t avr;
 } voltage_info_t;
 
-#define OVERSAMPLENR 4
+#define OVERSAMPLENR 8
 
 class Voltage {
 
@@ -93,6 +89,7 @@ class Voltage {
       HAL_ANALOG_SELECT(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN);
 
       HAL_timer_start(VOLTAGE_TIMER_NUM, VOLTAGE_TIMER_FREQUENCY);
+      SERIAL_ECHOLN(VOLTAGE_TIMER_FREQUENCY);
       ENABLE_VOLTAGE_INTERRUPT();
     }
 

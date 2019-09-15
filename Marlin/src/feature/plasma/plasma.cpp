@@ -2,17 +2,14 @@
 #include "plasma.h"
 #include "../../module/planner.h"
 
-#define TURN_PLASMA_ON  digitalWrite(PLASMA_START_PIN, PLASMA_START_INVERTING ? LOW : HIGH);
-#define TURN_PLASMA_OFF digitalWrite(PLASMA_START_PIN, PLASMA_START_INVERTING ? HIGH : LOW);
-#define IS_PLASMA_TRANSFERRED (digitalRead(PLASMA_TRANSFER_PIN) == (PLASMA_TRANSFER_INVERTING ? LOW : HIGH))
 
 PlasmaState Plasma::state = Locked;
 bool Plasma::stop_pending = false;
 //----------------------------------------------------------------------------//
 void Plasma::init()
 {
-  pinMode(PLASMA_START_PIN, OUTPUT);
-  pinMode(PLASMA_TRANSFER_PIN, INPUT);
+	SET_OUTPUT(PLASMA_START_PIN);
+	SET_INPUT_PULLUP(PLASMA_TRANSFER_PIN);
   stop();
 }
 //----------------------------------------------------------------------------//

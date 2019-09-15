@@ -3,6 +3,10 @@
 
 #include "../../core/enum.h"
 
+#define TURN_PLASMA_ON WRITE(PLASMA_START_PIN, HIGH);
+#define TURN_PLASMA_OFF WRITE(PLASMA_START_PIN, LOW);
+#define IS_PLASMA_TRANSFERRED READ(PLASMA_TRANSFER_PIN) ? LOW : HIGH
+
 class Plasma {
 
   public:

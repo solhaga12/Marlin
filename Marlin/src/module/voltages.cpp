@@ -34,6 +34,7 @@
 #include "../HAL/shared/Delay.h"
 #include "../libs/numtostr.h"
 #include "../core/serial.h"
+#include "../feature/plasma//plasma.h"
 
 
 Voltage voltageManager;
@@ -55,20 +56,18 @@ float Voltage::voltageReal = float();
  */
 void Voltage::set_current_voltage_avr() {
 
-   voltageDivider = (voltage_plus.acc - voltage_minus.acc)/OVERSAMPLENR;
+  #define OFFSET 35
+  #define SLOPE 4.85
+
+  voltageDivider = (voltage_plus.acc - voltage_minus.acc)/OVERSAMPLENR - OFFSET;
   if (voltageDivider > 1024) {
 	  voltageDivider = 0;
   }
-  // SERIAL_ECHO(voltage_plus.acc/OVERSAMPLENR);
-  // SERIAL_ECHO(" ");
-  // SERIAL_ECHO(voltage_minus.acc/OVERSAMPLENR);
-  // SERIAL_ECHO(" ");
-  // SERIAL_ECHOLN(voltageDivider);
   voltage_plus.acc = 0;
   voltage_minus.acc = 0;
   // Convert to real volts.
-  voltageReal = (voltageDivider - 35)/4.85;
-  SERIAL_ECHOLN(voltageReal);
+  voltageReal = (voltageDivider)/SLOPE;
+  // SERIAL_ECHOLN(voltageReal);
 }
 
 float Voltage::getVoltage() {
@@ -100,8 +99,8 @@ HAL_VOLTAGE_TIMER_ISR() {
 
 void Voltage::isr() {
 
-  static int8_t voltage_count = -1;
-  static ADCSensorState adc_sensor_state = StartupDelay;
+  static int8_t sample_count = 0;
+  static ADCSensorState adc_sensor_state = MeasureVoltagePlus;
 
   //
   // Update lcd buttons 488 times per second
@@ -119,41 +118,25 @@ void Voltage::isr() {
    * This gives each ADC 0.9765ms to charge up.
    */
 
-  // SERIAL_ECHOLNPAIR("ISR ",adc_sensor_state);
-
   switch (adc_sensor_state) {
-
-  	case StartupDelay:
-  		// Possible delays
-        adc_sensor_state = PrepareVoltagePlus;
-      break;
-
-    case PrepareVoltagePlus:
-      HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN);
-      adc_sensor_state = MeasureVoltagePlus;
-      break;
 
     case MeasureVoltagePlus:
       Voltage::voltage_plus.acc += HAL_READ_ADC();
-      adc_sensor_state = PrepareVoltageMinus;
-      break;
-
-    case PrepareVoltageMinus:
       HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN);
       adc_sensor_state = MeasureVoltageMinus;
       break;
 
     case MeasureVoltageMinus:
       Voltage::voltage_minus.acc += HAL_READ_ADC();
-      adc_sensor_state = AverageVoltage;
-      break;
+      HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN);
 
-    case AverageVoltage:                                   // Start of sampling loops. Do updates/checks.
-      if (++voltage_count >= OVERSAMPLENR) {                 // 10 * 16 * 1/(16000000/64/256)  = 164ms.
-        voltage_count = 0;
+      sample_count++;
+      if (sample_count >= OVERSAMPLENR) {
+        sample_count = 0;
+        TOGGLE(PLASMA_START_PIN);
         Voltage::set_current_voltage_avr();
       }
-      adc_sensor_state = StartupDelay;
+      adc_sensor_state = MeasureVoltagePlus;
       break;
 
   } // switch(adc_sensor_state)
