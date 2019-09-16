@@ -31,6 +31,7 @@ GcodeSuite gcode;
 #include "parser.h"
 #include "queue.h"
 #include "../module/motion.h"
+#include "../core/serial.h"
 
 #if ENABLED(PRINTCOUNTER)
   #include "../module/printcounter.h"
@@ -289,21 +290,42 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1: M0_M1(); break;                                   // M1: Conditional stop - Wait for user button press on LCD
       #endif
 
-      #if HAS_CUTTER
-        case 3: M3_M4(false); break;                              // M3: Turn ON Laser | Spindle (clockwise), set Power | Speed
-        case 4: M3_M4(true ); break;                              // M4: Turn ON Laser | Spindle (counter-clockwise), set Power | Speed
-        case 5: M5(); break;                                      // M5: Turn OFF Laser | Spindle
-      #endif
 
-      #if ENABLED(COOLANT_CONTROL)
-        #if ENABLED(COOLANT_MIST)
-          case 7: M7(); break;                                    // M7: Mist coolant ON
-        #endif
-        #if ENABLED(COOLANT_FLOOD)
-          case 8: M8(); break;                                    // M8: Flood coolant ON
-        #endif
-        case 9: M9(); break;                                      // M9: Coolant OFF
-      #endif
+        case 3:
+          SERIAL_ECHOLN("Start plasma torch.");
+          break;
+
+        case 4:
+          SERIAL_ECHOLN("Stop plasma torch.");
+          break;
+
+        case 5:
+          SERIAL_ECHOLN("Plasma spare.");
+          break;
+
+        case 6:
+          SERIAL_ECHOLN("THC on.");
+          break;
+
+        case 7:
+          SERIAL_ECHOLN("THC off.");
+          break;
+
+        case 8:
+          SERIAL_ECHOLN("Set THC voltage."); // See M141 for parameter.
+          break;
+
+        case 9:
+          SERIAL_ECHOLN("Set torch height."); // See M141 for parameter.
+          break;
+
+        // M3:  - Start plasma torch
+        // M4:  - Stop plasma torch
+        // M5:  - Plasma spare
+        // M6:  - THC on
+        // M7:  - THC off
+        // M8:  - Set THC voltage, parameter volt
+        // M9:  - Set torch height, parameter mm
 
       #if ENABLED(EXTERNAL_CLOSED_LOOP_CONTROLLER)
         case 12: M12(); break;                                    // M12: Synchronize and optionally force a CLC set
