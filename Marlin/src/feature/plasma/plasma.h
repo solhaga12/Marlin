@@ -1,6 +1,17 @@
 #ifndef PLASMA_H
 #define PLASMA_H
 
+/*
+ * M commands for plasma control
+ * M3: Start plasma torch
+ * M4: Spare
+ * M5: Stop plasma torch
+ * M6: THC on
+ * M7: THC off
+ * M8: Set THC voltage
+ * M9: Set torch height
+ */
+
 #include "../../core/enum.h"
 
 #define TURN_PLASMA_ON WRITE(PLASMA_START_PIN, HIGH);
