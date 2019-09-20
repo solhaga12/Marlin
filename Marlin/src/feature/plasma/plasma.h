@@ -3,13 +3,8 @@
 
 /*
  * M commands for plasma control
- * M3: Start plasma torch
- * M4: Spare
- * M5: Stop plasma torch
- * M6: THC on
- * M7: THC off
- * M8: Set THC voltage
- * M9: Set torch height
+ * M106 S<Voltage>, Start plasma with voltage
+ * M107, Stop plasma
  */
 
 #include "../../core/enum.h"

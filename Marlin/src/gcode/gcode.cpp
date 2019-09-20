@@ -114,6 +114,10 @@ void GcodeSuite::dwell(millis_t time) {
   while (PENDING(millis(), time)) idle();
 }
 
+void GcodeSuite::setDryRun(bool thruthValue) {
+  gcode.dryRun = thruthValue;
+}
+
 /**
  * When G29_RETRY_AND_RECOVER is enabled, call G29() in
  * a loop with recovery and retry handling.
@@ -290,43 +294,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1: M0_M1(); break;                                   // M1: Conditional stop - Wait for user button press on LCD
       #endif
 
-
-        case 3:
-          SERIAL_ECHOLN("Start plasma torch.");
-          break;
-
-        case 4:
-          SERIAL_ECHOLN("Stop plasma torch.");
-          break;
-
-        case 5:
-          SERIAL_ECHOLN("Plasma spare.");
-          break;
-
-        case 6:
-          SERIAL_ECHOLN("THC on.");
-          break;
-
-        case 7:
-          SERIAL_ECHOLN("THC off.");
-          break;
-
-        case 8:
-          SERIAL_ECHOLN("Set THC voltage."); // See M141 for parameter.
-          break;
-
-        case 9:
-          SERIAL_ECHOLN("Set torch height."); // See M141 for parameter.
-          break;
-
-        // M3:  - Start plasma torch
-        // M4:  - Stop plasma torch
-        // M5:  - Plasma spare
-        // M6:  - THC on
-        // M7:  - THC off
-        // M8:  - Set THC voltage, parameter volt
-        // M9:  - Set torch height, parameter mm
-
       #if ENABLED(EXTERNAL_CLOSED_LOOP_CONTROLLER)
         case 12: M12(); break;                                    // M12: Synchronize and optionally force a CLC set
       #endif
@@ -385,6 +352,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 100: M100(); break;                                  // M100: Free Memory Report
       #endif
 
+      case 106: M106(); break;                                     // M106: Start plasma cutter S<Voltage>
+      case 107: M107(); break;                                     // M107: Stop plasma cutter
       case 110: M110(); break;                                    // M110: Set Current Line Number
       case 111: M111(); break;                                    // M111: Set debug level
 

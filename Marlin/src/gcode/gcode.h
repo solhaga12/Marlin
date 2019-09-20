@@ -123,8 +123,8 @@
  * M100 - Watch Free Memory (for debugging) (Requires M100_FREE_MEMORY_WATCHER)
  * M104 - Set extruder target temp.
  * M105 - Report current temperatures.
- * M106 - Set print fan speed.
- * M107 - Print fan off.
+ * M106 - Plasma cutter on, S<Voltage>.
+ * M107 - Plasma cutter off.
  * M108 - Break out of heating loops (M109, M190, M303). With no controller, breaks out of M0/M1. (Requires EMERGENCY_PARSER)
  * M109 - S<temp> Wait for extruder current temp to reach target temp. ** Wait only when heating! **
  *        R<temp> Wait for extruder current temp to reach target temp. ** Wait for heating or cooling. **
@@ -346,7 +346,11 @@ public:
 
   static void dwell(millis_t time);
 
+  static void setDryRun(bool);
+
 private:
+
+  static bool dryRun;
 
   static void G0_G1(
     #if IS_SCARA || defined(G0_FEEDRATE)
@@ -535,6 +539,10 @@ private:
   #if ENABLED(M100_FREE_MEMORY_WATCHER)
     static void M100();
   #endif
+
+    // Plasma cutter
+    static void M106();
+    static void M107();
 
   #if DISABLED(EMERGENCY_PARSER)
     static void M108();

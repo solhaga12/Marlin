@@ -789,6 +789,9 @@
 #ifndef MSG_BUTTON_PRINT
   #define MSG_BUTTON_PRINT                    _UxGT("Print")
 #endif
+#ifndef MSG_BUTTON_DRY_RUN
+  #define MSG_BUTTON_DRY_RUN                  _UxGT("Dry run")
+#endif
 #ifndef MSG_BUTTON_RESET
   #define MSG_BUTTON_RESET                    _UxGT("Reset")
 #endif

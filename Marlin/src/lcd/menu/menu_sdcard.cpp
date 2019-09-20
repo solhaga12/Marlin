@@ -30,6 +30,7 @@
 
 #include "menu.h"
 #include "../../sd/cardreader.h"
+#include "../../gcode/gcode.h"
 
 #if !PIN_EXISTS(SD_DETECT)
   void lcd_sd_refresh() {
@@ -74,6 +75,14 @@ void lcd_sd_updir() {
 #endif
 
 inline void sdcard_start_selected_file() {
+  gcode.setDryRun(false);
+  card.openAndPrintFile(card.filename);
+  ui.return_to_status();
+  ui.reset_status();
+}
+
+inline void sdcard_start_selected_file_dry_run() {
+  gcode.setDryRun(true);
   card.openAndPrintFile(card.filename);
   ui.return_to_status();
   ui.reset_status();
@@ -83,8 +92,8 @@ inline void sdcard_start_selected_file() {
 
   void menu_sd_confirm() {
     do_select_screen(
-      PSTR(MSG_BUTTON_PRINT), PSTR(MSG_BUTTON_CANCEL),
-      sdcard_start_selected_file, ui.goto_previous_screen,
+      PSTR(MSG_BUTTON_PRINT), PSTR(MSG_BUTTON_DRY_RUN),
+      sdcard_start_selected_file, sdcard_start_selected_file_dry_run,
       PSTR(MSG_START_PRINT " "), card.longest_filename(), PSTR("?")
     );
   }
