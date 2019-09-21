@@ -346,7 +346,7 @@ public:
 
   static void dwell(millis_t time);
 
-  static void setDryRun(bool);
+  static void setDryRun(bool dryRun);
 
 private:
 

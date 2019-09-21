@@ -50,6 +50,8 @@ GcodeSuite gcode;
 
 millis_t GcodeSuite::previous_move_ms;
 
+static bool GcodeSuite::dryRun;
+
 bool GcodeSuite::axis_relative_modes[] = AXIS_RELATIVE_MODES;
 
 #if ENABLED(HOST_KEEPALIVE_FEATURE)
@@ -115,7 +117,7 @@ void GcodeSuite::dwell(millis_t time) {
 }
 
 void GcodeSuite::setDryRun(bool thruthValue) {
-  gcode.dryRun = thruthValue;
+  dryRun = thruthValue;
 }
 
 /**

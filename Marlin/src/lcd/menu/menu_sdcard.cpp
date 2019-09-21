@@ -30,7 +30,7 @@
 
 #include "menu.h"
 #include "../../sd/cardreader.h"
-#include "../../gcode/gcode.h"
+#include "../../gcode/gcode.h" // for setDryRun()
 
 #if !PIN_EXISTS(SD_DETECT)
   void lcd_sd_refresh() {
