@@ -3,7 +3,7 @@
  * Supposedly 1 V is 0,38 mm
  * That means, unfiltered, one bit is 76 um.
  *
- * The longer the distance, the higher tho voltage.
+ * The longer the distance, the higher the voltage.
  */
 
 

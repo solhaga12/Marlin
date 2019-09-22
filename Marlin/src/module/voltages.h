@@ -67,8 +67,10 @@ class Voltage {
     static voltage_info_t voltage_plus;
     static voltage_info_t voltage_minus;
     static uint16_t voltageDivider;
-    static uint16_t voltageReal;
     static uint16_t wantedThcVoltage;
+
+    #define OFFSET 23
+    #define SLOPE 5.0
 
   public:
     /**
@@ -95,7 +97,7 @@ class Voltage {
       SERIAL_ECHOLN(VOLTAGE_TIMER_FREQUENCY);
       ENABLE_VOLTAGE_INTERRUPT();
 
-      wantedThcVoltage = 100;
+      wantedThcVoltage = 100 * SLOPE;
     }
 
     /**

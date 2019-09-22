@@ -51,16 +51,25 @@ VoltageInfo Voltage::voltage_minus = VoltageInfo();
 VoltageInfo Voltage::voltage_plus = VoltageInfo();
 
 uint16_t Voltage::voltageDivider = uint16_t();
-uint16_t Voltage::voltageReal = uint16_t();
 uint16_t Voltage::wantedThcVoltage = uint16_t();
 
 /**
  * Get average (avr) voltages
  */
 void Voltage::set_current_voltage_avr() {
+  static uint16_t meanVoltage = 0;
+  static uint16_t loopCount = 0;
 
-  #define OFFSET 35
-  #define SLOPE 4.85
+  // Help to determine OFFSET and SLOPE
+  /*
+  meanVoltage += (voltage_plus.acc - voltage_minus.acc);
+  loopCount++;
+  if (loopCount == 50) {
+    meanVoltage /= loopCount;
+    loopCount = 0;
+    SERIAL_ECHOLNPAIR("mean VD: ", (meanVoltage - OFFSET)/SLOPE);
+  }
+  */
 
   voltageDivider = (voltage_plus.acc - voltage_minus.acc)/OVERSAMPLENR - OFFSET;
   if (voltageDivider > 1024) {
@@ -68,14 +77,12 @@ void Voltage::set_current_voltage_avr() {
   }
   voltage_plus.acc = 0;
   voltage_minus.acc = 0;
-  // Convert to real volts.
-  voltageReal = (voltageDivider)/SLOPE;
-  // SERIAL_ECHOLN(voltageReal);
+  // Resolution is 0.200 mV, so use the voltageDivider value as is.
 }
 
 uint16_t Voltage::getActualThcVoltage() {
 
-	return voltageReal;
+	return voltageDivider;
 }
 
 uint16_t Voltage::getWantedThcVoltage() {
@@ -110,8 +117,8 @@ HAL_VOLTAGE_TIMER_ISR() {
 
 void Voltage::isr() {
 
-  static int8_t sample_count = 0;
-  static ADCSensorState adc_sensor_state = MeasureVoltagePlus;
+  static int8_t sampleCount = 0;
+  static ADCSensorState adcSensorState = MeasureVoltagePlus;
 
   //
   // Update lcd buttons 488 times per second
@@ -129,30 +136,30 @@ void Voltage::isr() {
    * This gives each ADC 0.9765ms to charge up.
    */
 
-  switch (adc_sensor_state) {
+  switch (adcSensorState) {
 
     case MeasureVoltagePlus:
       Voltage::voltage_plus.acc += HAL_READ_ADC();
       HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_MINUS_PIN);
-      adc_sensor_state = MeasureVoltageMinus;
+      adcSensorState = MeasureVoltageMinus;
       break;
 
     case MeasureVoltageMinus:
       Voltage::voltage_minus.acc += HAL_READ_ADC();
       HAL_START_ADC(PLASMA_VOLTAGE_DIVIDER_PLUS_PIN);
 
-      sample_count++;
-      if (sample_count >= OVERSAMPLENR) {
-        sample_count = 0;
+      sampleCount++;
+      if (sampleCount >= OVERSAMPLENR) {
+        sampleCount = 0;
         TOGGLE(PLASMA_VD_UPDATES_PIN); // To see the sample time on an oscilloscope.
         Voltage::set_current_voltage_avr(); // With OVERSAMPLENR = 1, we get 2 ms
         PlasmaState plasma_state = plasmaManager.update();
         torchHeightController.update(plasma_state);
       }
-      adc_sensor_state = MeasureVoltagePlus;
+      adcSensorState = MeasureVoltagePlus;
       break;
 
-  } // switch(adc_sensor_state)
+  } // switch(adcSensorState)
 
   //
   // Additional ~1kHz Tasks

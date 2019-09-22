@@ -573,19 +573,19 @@ void MarlinUI::status_screen() {
   const int16_t old_thc = Voltage::getWantedThcVoltage();
         int16_t new_thc = old_thc + int16_t(encoderPosition);
 
-  // Dead zone at 100 V
-  if (old_thc == 100) {
+  // Dead zone at SLOPE * 100 V
+  if (old_thc == (100 * SLOPE)) {
     if (int16_t(encoderPosition) > ENCODER_THC_DEADZONE)
-      new_thc -= ENCODER_THC_DEADZONE;
+      new_thc -= (ENCODER_THC_DEADZONE * SLOPE);
     else if (int16_t(encoderPosition) < -(ENCODER_THC_DEADZONE))
-      new_thc += ENCODER_THC_DEADZONE;
+      new_thc += (ENCODER_THC_DEADZONE * SLOPE);
     else
       new_thc = old_thc;
   }
-  else if ((old_thc < 100 && new_thc > 100) || (old_thc > 100 && new_thc < 100))
-    new_thc = 100;
+  else if ((old_thc < (100 * SLOPE) && new_thc > (100 * SLOPE)) || (old_thc > (100 * SLOPE) && new_thc < (100 * SLOPE)))
+    new_thc = 500;
 
-  LIMIT(new_thc, 50, 200);
+  LIMIT(new_thc, (50 * SLOPE), (200 * SLOPE));
 
   if (old_thc != new_thc) {
     Voltage::setWantedThcVoltage(new_thc);

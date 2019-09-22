@@ -18,7 +18,7 @@ void GcodeSuite::M106() {
 
   if (!dryRun) {
     SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage);
-    voltageManager.setWantedThcVoltage(voltage);
+    voltageManager.setWantedThcVoltage(voltage * SLOPE);
     // Start plasma sequence
     plasmaManager.start();
   }
