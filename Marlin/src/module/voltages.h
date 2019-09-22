@@ -52,7 +52,7 @@ typedef struct VoltageInfo {
   uint16_t avr;
 } voltage_info_t;
 
-#define OVERSAMPLENR 8
+#define OVERSAMPLENR 1
 
 class Voltage {
 
@@ -110,3 +110,5 @@ class Voltage {
   private:
     static void set_current_voltage_avr();
 };
+
+extern Voltage voltageManager;

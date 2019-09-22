@@ -34,7 +34,9 @@
 #include "../HAL/shared/Delay.h"
 #include "../libs/numtostr.h"
 #include "../core/serial.h"
-#include "../feature/plasma//plasma.h"
+#include "../feature/plasma/plasma.h"
+#include "../feature/plasma/torch_height_control.h"
+
 
 
 Voltage voltageManager;
@@ -143,7 +145,9 @@ void Voltage::isr() {
       if (sample_count >= OVERSAMPLENR) {
         sample_count = 0;
         TOGGLE(PLASMA_VD_UPDATES_PIN); // To see the sample time on an oscilloscope.
-        Voltage::set_current_voltage_avr();
+        Voltage::set_current_voltage_avr(); // With OVERSAMPLENR = 1, we get 2 ms
+        PlasmaState plasma_state = plasmaManager.update();
+        torchHeightController.update(plasma_state);
       }
       adc_sensor_state = MeasureVoltagePlus;
       break;
@@ -164,7 +168,5 @@ void Voltage::isr() {
   // Periodically call the planner timer
   planner.tick();
 
-  // Test Transfer pin 40
-  // SERIAL_ECHOLN(READ(PLASMA_TRANSFER_PIN));
 
 }

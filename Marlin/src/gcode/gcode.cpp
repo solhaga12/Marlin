@@ -354,8 +354,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 100: M100(); break;                                  // M100: Free Memory Report
       #endif
 
-      case 106: M106(); break;                                     // M106: Start plasma cutter S<Voltage>
-      case 107: M107(); break;                                     // M107: Stop plasma cutter
+      case 106: M106(); break;                                    // M106: Start plasma cutter S<Voltage>
+      case 107: M107(); break;                                    // M107: Stop plasma cutter
       case 110: M110(); break;                                    // M110: Set Current Line Number
       case 111: M111(); break;                                    // M111: Set debug level
 

@@ -2,6 +2,7 @@
 #include "plasma.h"
 #include "../../module/planner.h"
 
+Plasma plasmaManager;
 
 PlasmaState Plasma::state = Locked;
 bool Plasma::stop_pending = false;
@@ -54,6 +55,30 @@ void Plasma::unlock()
 //----------------------------------------------------------------------------//
 PlasmaState Plasma::update()
 {
+  static PlasmaState oldState = Off;
+
+  if (oldState != state) {
+    switch(state)
+    {
+      case Locked:
+        SERIAL_ECHOLN("Plasma state: Locked");
+        break;
+      case Off:
+        SERIAL_ECHOLN("Plasma state: Off");
+        break;
+      case Ignition:
+        SERIAL_ECHOLN("Plasma state: Ignition");
+        break;
+      case Established:
+        SERIAL_ECHOLN("Plasma state: Established");
+        break;
+      case Lost:
+        SERIAL_ECHOLN("Plasma state: Lost");
+        break;
+    }
+    oldState = state;
+  }
+
   switch(state)
   {
     case Locked:

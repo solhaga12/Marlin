@@ -4,6 +4,7 @@
 #include "../gcode.h"
 #include "../../core/serial.h"
 #include "../../module/voltages.h"
+#include "../../feature/plasma/plasma.h"
 
 void GcodeSuite::M106() {
   uint16_t voltage = 125;
@@ -17,8 +18,9 @@ void GcodeSuite::M106() {
 
   if (!dryRun) {
     SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage);
-    Voltage::setWantedThcVoltage(voltage);
-    // Start plasma
+    voltageManager.setWantedThcVoltage(voltage);
+    // Start plasma sequence
+    plasmaManager.start();
   }
   else {
     SERIAL_ECHOLN("Start dry run");
@@ -30,6 +32,7 @@ void GcodeSuite::M107() {
   if (!dryRun) {
     SERIAL_ECHOLN("Stop plasma");
     // Stop plasma
+    plasmaManager.stop();
   }
   else {
     SERIAL_ECHOLN("Stop dry run");

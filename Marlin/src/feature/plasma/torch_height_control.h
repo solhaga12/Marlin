@@ -1,3 +1,13 @@
+/*
+ * 200 V and 10 bits FSD, gives a resolution of 0,2 V/bit
+ * Supposedly 1 V is 0,38 mm
+ * That means, unfiltered, one bit is 76 um.
+ *
+ * The longer the distance, the higher tho voltage.
+ */
+
+
+
 #ifndef TORCH_HEIGHT_CONTROL_H
 #define TORCH_HEIGHT_CONTROL_H
 
