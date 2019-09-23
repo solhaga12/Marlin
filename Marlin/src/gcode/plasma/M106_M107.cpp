@@ -14,6 +14,7 @@ void GcodeSuite::M106() {
 
   if (dryRun) {
     SERIAL_ECHOLN("Start dry run");
+    TURN_PLASMA_OFF
     return;
   }
 
@@ -42,6 +43,8 @@ void GcodeSuite::M106() {
   }
   SERIAL_ECHOLN("Plasma did not start");
   TURN_PLASMA_OFF
+  SERIAL_ECHOLN("PLASMA STOP");
+  dryRun = true;
 }
 
 void GcodeSuite::M107() {
