@@ -38,7 +38,6 @@
 #include "module/endstops.h"
 #include "module/probe.h"
 #include "module/voltages.h"
-#include "feature/plasma/plasma.h"
 #include "feature/plasma/torch_height_control.h"
 #include "sd/cardreader.h"
 #include "module/configuration_store.h"
@@ -846,9 +845,6 @@ void setup() {
 
   Voltage voltageManager = Voltage();
   voltageManager.init();    // Initialize voltage loop
-
-  Plasma plasmaManager = Plasma();
-  plasmaManager.init();    // Initialize plasma loop
 
   TorchHeightController torchHeightController = TorchHeightController();
   torchHeightController.init(); // Initialize THC loop
