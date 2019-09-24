@@ -152,7 +152,7 @@ void Voltage::isr() {
         sampleCount = 0;
         TOGGLE(PLASMA_VD_UPDATES_PIN); // To see the sample time on an oscilloscope.
         Voltage::set_current_voltage_avr(); // With OVERSAMPLENR = 1, we get 2 ms
-        // torchHeightController.update(plasma_state);
+        torchHeightController.update();
       }
       adcSensorState = MeasureVoltagePlus;
       break;

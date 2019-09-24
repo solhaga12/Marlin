@@ -6,6 +6,7 @@
 #include "../../core/serial.h"
 #include "../../module/voltages.h"
 #include "../../module/stepper.h"
+#include "../../feature/plasma/torch_height_control.h"
 
 void GcodeSuite::M106() {
   uint16_t voltage = 125;
@@ -15,6 +16,7 @@ void GcodeSuite::M106() {
   if (dryRun) {
     SERIAL_ECHOLN("Start dry run");
     TURN_PLASMA_OFF
+    torchHeightController.disable();
     return;
   }
 
@@ -37,6 +39,7 @@ void GcodeSuite::M106() {
     if (IS_PLASMA_TRANSFERRED)
     {
       SERIAL_ECHOLN("PLASMA TRANSFER");
+      torchHeightController.enable();
         return;
     }
     delay(WAIT_FOR_PLASMA_LOOP);
@@ -44,6 +47,7 @@ void GcodeSuite::M106() {
   SERIAL_ECHOLN("Plasma did not start");
   TURN_PLASMA_OFF
   SERIAL_ECHOLN("PLASMA STOP");
+  torchHeightController.disable();
   dryRun = true;
 }
 
@@ -56,6 +60,6 @@ void GcodeSuite::M107() {
 
   SERIAL_ECHOLN("PLASMA STOP");
   TURN_PLASMA_OFF
-
+  torchHeightController.disable();
   stepper.synchronize();
 }

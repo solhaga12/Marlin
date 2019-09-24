@@ -22,7 +22,7 @@ class TorchHeightController {
     static THCState get_state();
     static void set_max_acc_step_s2(unsigned long);
 
-    static void update(PlasmaState);
+    static void update();
     static void ovf_isr();
     static void capt_isr();
 

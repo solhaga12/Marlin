@@ -62,9 +62,8 @@ THCState TorchHeightController::get_state()
   return _state;
 }
 //----------------------------------------------------------------------------//
-void TorchHeightController::update(PlasmaState plasma_state)
+void TorchHeightController::update()
 {
-  int32_t voltage_mv = 10; // ADS1015_device.read(); Read the ADC
   if(_state == Enabled)
   {
     //PID--------------//
@@ -102,34 +101,6 @@ void TorchHeightController::update(PlasmaState plasma_state)
       kill("Stop: Z overrun.");
     }
 
-    // plasma transfer is lost, move Z to safe position
-    if(plasma_state == Lost)
-    {
-      // Z is far enough from top, use max speed
-      if(_z_top_pos - z_pos > _max_stopping_distance)
-      {
-        _target_speed = PLASMA_MAX_THC_STEP_S;
-      }
-      else // Z approch top, move one step per update()
-      {
-        _target_speed = 0;
-        // do a step if Z below top
-        if(_speed == 0 && z_pos < _z_top_pos)
-        {
-          _dir = 1;
-          Z_DIR_WRITE(INVERT_Z_DIR ^ (_dir > 0));
-          Z_STEP_WRITE(!INVERT_Z_STEP_PIN);
-          delayMicroseconds(2);
-          Z_STEP_WRITE(INVERT_Z_STEP_PIN);
-          stepper.shift_z_position(_dir);
-        }
-      }
-    }
-    // plasma have been stopped voluntarily, just stop THC
-    else if(plasma_state != Established)
-    {
-      disable();
-    }
   }
 
   int32_t acc = _target_speed - _speed;
