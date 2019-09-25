@@ -65,6 +65,8 @@ class Voltage {
     static uint16_t getActualThcVoltage();
     static uint16_t getWantedThcVoltage();
     static void setWantedThcVoltage(uint16_t voltage);
+    static void enableThc(void);
+    static void disableThc(void);
 
   private:
 
@@ -72,6 +74,7 @@ class Voltage {
     static voltage_info_t voltage_minus;
     static uint16_t voltageDivider;
     static uint16_t wantedThcVoltage;
+    static bool runThc;
 
     #define OFFSET 23
     #define SLOPE 5.0
@@ -106,6 +109,7 @@ class Voltage {
       SET_INPUT_PULLUP(PLASMA_TRANSFER_PIN);
 
       wantedThcVoltage = 100 * SLOPE;
+      runThc = false;
     }
 
     /**
@@ -118,7 +122,8 @@ class Voltage {
     static void isr();
 
   private:
-    static void set_current_voltage_avr();
+    static void SetCurrentVoltageAverage();
+    static void updateThc();
 };
 
 extern Voltage voltageManager;

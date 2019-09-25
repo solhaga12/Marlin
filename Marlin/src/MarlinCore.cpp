@@ -38,7 +38,6 @@
 #include "module/endstops.h"
 #include "module/probe.h"
 #include "module/voltages.h"
-#include "feature/plasma/torch_height_control.h"
 #include "sd/cardreader.h"
 #include "module/configuration_store.h"
 #include "module/printcounter.h" // PrintCounter or Stopwatch
@@ -845,10 +844,6 @@ void setup() {
 
   Voltage voltageManager = Voltage();
   voltageManager.init();    // Initialize voltage loop
-
-  TorchHeightController torchHeightController = TorchHeightController();
-  torchHeightController.init(); // Initialize THC loop
-
 
   print_job_timer.init();   // Initial setup of print job timer
 

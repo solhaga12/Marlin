@@ -34,9 +34,7 @@
 #include "../HAL/shared/Delay.h"
 #include "../libs/numtostr.h"
 #include "../core/serial.h"
-#include "../feature/plasma/torch_height_control.h"
-
-
+#include "stepper.h"
 
 Voltage voltageManager;
 
@@ -52,10 +50,12 @@ VoltageInfo Voltage::voltage_plus = VoltageInfo();
 uint16_t Voltage::voltageDivider = uint16_t();
 uint16_t Voltage::wantedThcVoltage = uint16_t();
 
+bool Voltage::runThc = bool();
+
 /**
  * Get average (avr) voltages
  */
-void Voltage::set_current_voltage_avr() {
+void Voltage::SetCurrentVoltageAverage() {
   static uint16_t meanVoltage = 0;
   static uint16_t loopCount = 0;
 
@@ -91,7 +91,23 @@ uint16_t Voltage::getWantedThcVoltage() {
 void Voltage::setWantedThcVoltage(uint16_t voltage_) {
   wantedThcVoltage = voltage_;
 }
+void Voltage::enableThc(void) {
+  stepper.leave_control_on(Z_AXIS);
+  runThc = true;
+};
+void Voltage::disableThc(void) {
+  stepper.take_control_on(Z_AXIS);
+  runThc = false;
+};
 
+void Voltage::updateThc(void) {
+
+  // Get difference between set and actual voltage
+  // Based on the difference, step Z a of number steps
+  // Check boundaries form initial height usually 1.5 mm,
+  // to let say 10 mm. If out of bounds, disableThc and also let PLASMA START go.
+
+};
 /**
  * Timer 0 is shared with millies so don't change the prescaler.
  *
@@ -151,8 +167,8 @@ void Voltage::isr() {
       if (sampleCount >= OVERSAMPLENR) {
         sampleCount = 0;
         TOGGLE(PLASMA_VD_UPDATES_PIN); // To see the sample time on an oscilloscope.
-        Voltage::set_current_voltage_avr(); // With OVERSAMPLENR = 1, we get 2 ms
-        torchHeightController.update();
+        Voltage::SetCurrentVoltageAverage(); // With OVERSAMPLENR = 1, we get 2 ms
+        if (runThc) updateThc();
       }
       adcSensorState = MeasureVoltagePlus;
       break;
