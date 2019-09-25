@@ -63,7 +63,7 @@ THCState TorchHeightController::getState()
 void TorchHeightController::update()
 {
   // read the set and read voltage??
-
+  int32_t voltage_mv = ADS1015_device.read();
   if(state == Enabled)
   {
     //PID--------------//
