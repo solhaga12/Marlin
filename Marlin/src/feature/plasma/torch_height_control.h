@@ -19,28 +19,28 @@ class TorchHeightController {
     static void init();
     static void enable();
     static void disable();
-    static THCState get_state();
-    static void set_max_acc_step_s2(unsigned long);
+    static THCState getState();
+    static void setMaxAccStepS2(unsigned long);
 
     static void update();
     static void ovf_isr();
     static void capt_isr();
 
   private:
-    static void _reset_PID();
+    static void resetPID();
 
-    static THCState _state;
-    static bool _counting_up;
-    static int32_t _target_speed;
-    static int16_t _speed;
-    static int16_t _max_acc;
-    static int8_t _dir;
-    static uint16_t _max_stopping_distance;
-    static long _z_top_pos;
-    static long _z_bottom_pos;
+    static THCState state;
+    static bool countingUp;
+    static int32_t targetSpeed;
+    static int16_t speed;
+    static int16_t maxAcc;
+    static int8_t direction;
+    static uint16_t maxStoppingDistance;
+    static long zTopPosition;
+    static long zBottomPosition;
 
-    static int16_t _new_target_speed;
-    static int16_t _counter;
+    static int16_t newTargetSpeed;
+    static int16_t counter;
 };
 
 extern TorchHeightController torchHeightController;

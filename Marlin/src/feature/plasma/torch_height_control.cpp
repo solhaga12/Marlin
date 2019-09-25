@@ -1,30 +1,28 @@
 #include "torch_height_control.h"
-// #include "ADS1015.h"
 #include "../../module/stepper.h"
 
 #define PAUSE_TIMER4  TCCR4B = _BV(WGM43);
 #define RESUME_TIMER4 TCCR4B = _BV(WGM43) | _BV(CS41) | _BV(CS40);
 
-THCState TorchHeightController::_state = Disabled;
-bool TorchHeightController::_counting_up = true;
-int32_t TorchHeightController::_target_speed = 0;
-int16_t TorchHeightController::_speed = 0;
-int16_t TorchHeightController::_max_acc = 0;
-int8_t TorchHeightController::_dir = 1;
-uint16_t TorchHeightController::_max_stopping_distance = 0xFFFF;
-long TorchHeightController::_z_top_pos = 0;
-long TorchHeightController::_z_bottom_pos = 0;
+THCState TorchHeightController::state = Disabled;
+bool TorchHeightController::countingUp = true;
+int32_t TorchHeightController::targetSpeed = 0;
+int16_t TorchHeightController::speed = 0;
+int16_t TorchHeightController::maxAcc = 0;
+int8_t TorchHeightController::direction = 1;
+uint16_t TorchHeightController::maxStoppingDistance = 0xFFFF;
+long TorchHeightController::zTopPosition = 0;
+long TorchHeightController::zBottomPosition = 0;
 
-int16_t TorchHeightController::_new_target_speed = 25000;
-int16_t TorchHeightController::_counter = 0;
+int16_t TorchHeightController::newTargetSpeed = 25000;
+int16_t TorchHeightController::counter = 0;
 
 //----------------------------------------------------------------------------//
 void TorchHeightController::init()
 {
-  // ADS1015_device.init(); TODO Init the ADC channels!
 
-  _z_top_pos = 10; // sw_endstop_max[Z_AXIS] * planner.axis_steps_per_mm[Z_AXIS]; TODO What to use here?
-  _z_bottom_pos = 0;
+  zTopPosition = 10; // sw_endstop_max[Z_AXIS] * planner.axis_steps_per_mm[Z_AXIS]; TODO What to use here?
+  zBottomPosition = 0;
 
   // Set maximal period (considered as speed = 0)
   ICR4 = 0xFFFF;
@@ -45,127 +43,129 @@ void TorchHeightController::enable()
   stepper.leave_control_on(Z_AXIS);
   Z_ENABLE_WRITE(Z_ENABLE_ON);
 
-  _reset_PID();
+  resetPID();
 
-  _state = Enabled;
+  state = Enabled;
 }
 //----------------------------------------------------------------------------//
 void TorchHeightController::disable()
 {
-  _target_speed = 0;
-  if(_state == Enabled)
-    _state = Disabling;
+  targetSpeed = 0;
+  if(state == Enabled)
+    state = Disabling;
 }
 //----------------------------------------------------------------------------//
-THCState TorchHeightController::get_state()
+THCState TorchHeightController::getState()
 {
-  return _state;
+  return state;
 }
 //----------------------------------------------------------------------------//
 void TorchHeightController::update()
 {
-  if(_state == Enabled)
+  // read the set and read voltage??
+
+  if(state == Enabled)
   {
     //PID--------------//
-    if(_counter == 200)
+    if(counter == 200)
     {
-      _counter = 0;
-      _new_target_speed = -_new_target_speed;
+      counter = 0;
+      newTargetSpeed = -newTargetSpeed;
     }
     else
     {
-      _counter++;
+      counter++;
     }
-    _target_speed = _new_target_speed;
+    targetSpeed = newTargetSpeed;
     //--------------//
   }
 
   //THC is disabled or disabling
-  if(_state != Enabled)
+  if(state != Enabled)
   {
-    _target_speed = 0;
-    if(_state == Disabling && _speed == 0)
+    targetSpeed = 0;
+    if(state == Disabling && speed == 0)
     {
       // Z have stopped, give back Z control to stepper class
       planner.set_z_position_step(stepper.position(Z_AXIS));
       stepper.take_control_on(Z_AXIS);
-      _state = Disabled;
+      state = Disabled;
     }
   }
   else // THC is enabled
   {
     // check for software endstop overrun
     long z_pos = stepper.position(Z_AXIS);
-    if(z_pos > _z_top_pos || z_pos < _z_bottom_pos)
+    if(z_pos > zTopPosition || z_pos < zBottomPosition)
     {
       kill("Stop: Z overrun.");
     }
 
   }
 
-  int32_t acc = _target_speed - _speed;
+  int32_t acc = targetSpeed - speed;
 
   // don't touch anything, speed is fine
   if(acc == 0)
     return;
 
-  // clip acceleration to _max_acc
-  if(acc > _max_acc)
-    acc = _max_acc;
-  else if(acc < -_max_acc)
-    acc = -_max_acc;
+  // clip acceleration to maxAcc
+  if(acc > maxAcc)
+    acc = maxAcc;
+  else if(acc < -maxAcc)
+    acc = -maxAcc;
 
   // apply acceleration
-  _speed = _speed + acc;
+  speed = speed + acc;
 
-  int16_t max_speed = PLASMA_MAX_THC_STEP_S;
-  if(_speed > max_speed)
-    _speed = max_speed;
-  else if(_speed < -max_speed)
-    _speed = -max_speed;
+  int16_t maxSpeed = PLASMA_MAX_THC_STEP_S;
+  if(speed > maxSpeed)
+    speed = maxSpeed;
+  else if(speed < -maxSpeed)
+    speed = -maxSpeed;
 
   // compute step direction and frequency
-  uint16_t freq;
-  if(_speed >= 0)
+  uint16_t frequency;
+  if(speed >= 0)
   {
-    freq = _speed;
-    _dir = 1;
+    frequency = speed;
+    direction = 1;
   }
   else
   {
-    freq = -_speed;
-    _dir = -1;
+    frequency = -speed;
+    direction = -1;
   }
 
   // compute interrupts period for step generation
   uint16_t period;
-  if(freq == 0)
+  if(frequency == 0)
     period = 0xFFFF;
   else
-    period = min(250000 / freq, 0xFFFF);
+    period = min(250000 / frequency, 0xFFFF);
 
   PAUSE_TIMER4;
-  Z_DIR_WRITE(INVERT_Z_DIR ^ (_dir > 0));
-  uint16_t elapsed = _counting_up ? TCNT4 : ICR4 - TCNT4;
+  Z_DIR_WRITE(INVERT_Z_DIR ^ (direction > 0));
+  uint16_t elapsed = countingUp ? TCNT4 : ICR4 - TCNT4;
   uint16_t rest = elapsed > period ? 0 : period - elapsed;
   ICR4 = period;
-  TCNT4 = _counting_up ? period - rest : rest;
+  TCNT4 = countingUp ? period - rest : rest;
   RESUME_TIMER4;
 }
 //----------------------------------------------------------------------------//
-void TorchHeightController::set_max_acc_step_s2(unsigned long max_acc)
+void TorchHeightController::setmaxAccStepS2(unsigned long maxAcc)
 {
   // store acceleration is milliseconds as update will be called at 1kHz
-  _max_acc = max_acc / 1000;
+  maxAcc = maxAcc / 1000;
 
   unsigned long max_freq = PLASMA_MAX_THC_STEP_S;
-  _max_stopping_distance = pow(max_freq, 2) / max_acc;
+  maxStoppingDistance = pow(maxFreq, 2) / maxAcc;
 }
 //----------------------------------------------------------------------------//
-void TorchHeightController::_reset_PID()
+void TorchHeightController::resetPID()
 {
-  _new_target_speed = 25000;
-  _counter = 100;
+  newTargetSpeed = 25000;
+  counter = 100;
 }
 //----------------------------------------------------------------------------//
 ISR(TIMER4_OVF_vect){ TorchHeightController::ovf_isr(); }
@@ -178,8 +178,8 @@ void TorchHeightController::ovf_isr()
   else
   {
     Z_STEP_WRITE(!INVERT_Z_STEP_PIN);
-    _counting_up = true;
-    stepper.shift_z_position(_dir);
+    countingUp = true;
+    stepper.shift_z_position(direction);
     Z_STEP_WRITE(INVERT_Z_STEP_PIN);
   }
 }
@@ -194,8 +194,8 @@ void TorchHeightController::capt_isr()
   else
   {
     Z_STEP_WRITE(!INVERT_Z_STEP_PIN);
-    _counting_up = false;
-    stepper.shift_z_position(_dir);
+    countingUp = false;
+    stepper.shift_z_position(direction);
     Z_STEP_WRITE(INVERT_Z_STEP_PIN);
   }
 }
