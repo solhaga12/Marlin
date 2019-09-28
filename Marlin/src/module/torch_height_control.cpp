@@ -1,5 +1,5 @@
 #include "torch_height_control.h"
-#include "ADS1015.h"
+
 #include "stepper.h"
 
 #define PAUSE_TIMER4  TCCR4B = _BV(WGM43);
@@ -21,9 +21,8 @@ int16_t TorchHeightController::_counter = 0;
 //----------------------------------------------------------------------------//
 void TorchHeightController::init()
 {
-  ADS1015_device.init();
 
-  _z_top_pos = sw_endstop_max[Z_AXIS] * planner.axis_steps_per_mm[Z_AXIS];
+  _z_top_pos = 10; // mm?
   _z_bottom_pos = 0;
 
   // Set maximal period (considered as speed = 0)
@@ -64,7 +63,9 @@ THCState TorchHeightController::get_state()
 //----------------------------------------------------------------------------//
 void TorchHeightController::update(PlasmaState plasma_state)
 {
-  int32_t voltage_mv = ADS1015_device.read();
+
+  // get set and actual voltage
+
   if(_state == Enabled)
   {
     //PID--------------//

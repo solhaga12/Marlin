@@ -1,8 +1,8 @@
 #ifndef TORCH_HEIGHT_CONTROL_H
 #define TORCH_HEIGHT_CONTROL_H
 
-#include "Marlin.h"
-#include "enum.h"
+#include "../Marlin.h"
+#include "../core/enum.h"
 
 class TorchHeightController {
   public:
