@@ -35,6 +35,7 @@
 #include "../libs/numtostr.h"
 #include "../core/serial.h"
 #include "stepper.h"
+#include "../gcode/queue.h"
 
 Voltage voltageManager;
 
@@ -94,10 +95,13 @@ void Voltage::setWantedThcVoltage(uint16_t voltage_) {
 void Voltage::enableThc(void) {
   stepper.leave_control_on(Z_AXIS);
   runThc = true;
+
+  SERIAL_ECHOLN("enableTHC");
 };
 void Voltage::disableThc(void) {
   stepper.take_control_on(Z_AXIS);
   runThc = false;
+  SERIAL_ECHOLN("disableTHC");
 };
 
 void Voltage::updateThc(void) {
@@ -108,19 +112,7 @@ void Voltage::updateThc(void) {
   // to let say 10 mm. If out of bounds, disableThc and also let PLASMA START go.
 
 };
-/**
- * Timer 0 is shared with millies so don't change the prescaler.
- *
- * On AVR this ISR uses the compare method so it runs at the base
- * frequency (16 MHz / 64 / 256 = 976.5625 Hz), but at the TCNT0 set
- * in OCR0B above (128 or halfway between OVFs).
- *
- *  - Prepare or Measure one of the raw ADC sensor values
- *  - Step the babysteps value for each axis towards 0
- *  - For PINS_DEBUGGING, monitor and report endstop pins
- *  - For ENDSTOP_INTERRUPTS_FEATURE check endstops if flagged
- *  - Call planner.tick to count down its "ignore" time
- */
+
 HAL_VOLTAGE_TIMER_ISR() {
   HAL_timer_isr_prologue(VOLTAGE_TIMER_NUM);
 
@@ -134,22 +126,6 @@ void Voltage::isr() {
 
   static int8_t sampleCount = 0;
   static ADCSensorState adcSensorState = MeasureVoltagePlus;
-
-  //
-  // Update lcd buttons 488 times per second
-  // Perhaps this will be added
-  // static bool do_buttons;
-  // if ((do_buttons ^= true)) ui.update_buttons();
-
-  /**
-   * One sensor is sampled on every other call of the ISR.
-   * Each sensor is read 16 (OVERSAMPLENR) times, taking the average.
-   *
-   * On each Prepare pass, ADC is started for a sensor pin.
-   * On the next pass, the ADC value is read and accumulated.
-   *
-   * This gives each ADC 0.9765ms to charge up.
-   */
 
   switch (adcSensorState) {
 

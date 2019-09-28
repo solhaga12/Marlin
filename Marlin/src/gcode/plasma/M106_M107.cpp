@@ -54,6 +54,7 @@ void GcodeSuite::M107() {
 
   if (dryRun) {
     SERIAL_ECHOLN("Stop dry run");
+    dryRun = false;
     return;
   }
 
