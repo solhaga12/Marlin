@@ -531,12 +531,9 @@ void MarlinUI::draw_status_screen() {
   lcd_put_wchar('C');
   lcd_put_wchar(' ');
   lcd_put_u8str(ftostr41nosign(Voltage::getActualThcVoltage()/SLOPE));
-  lcd_put_wchar(' ');
-  if (Voltage::getActualThcVoltage() == Voltage::getWantedThcVoltage()) lcd_put_wchar('=');
-  else if (Voltage::getActualThcVoltage() < Voltage::getWantedThcVoltage()) lcd_put_wchar('<');
-  else if (Voltage::getActualThcVoltage() > Voltage::getWantedThcVoltage()) lcd_put_wchar('>');
-  lcd_put_wchar(' ');
+  lcd_put_wchar('(');
   lcd_put_u8str(ftostr41nosign(Voltage::getWantedThcVoltage()/SLOPE));
+  lcd_put_wchar(')');
 
     // ========== Line 2 ==========
 
