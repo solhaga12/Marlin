@@ -107,15 +107,7 @@ typedef struct block_t {
   };
   uint32_t step_event_count;                // The number of step events required to complete this block
 
-  #if EXTRUDERS > 1
-    uint8_t extruder;                       // The extruder to move (if E move)
-  #else
-    static constexpr uint8_t extruder = 0;
-  #endif
-
-  #if ENABLED(MIXING_EXTRUDER)
-    MIXER_BLOCK_FIELD;                      // Normalized color for the mixing steppers
-  #endif
+  static constexpr uint8_t extruder = 0;
 
   // Settings for the trapezoid generator
   uint32_t accelerate_until,                // The index of the step event on which to stop acceleration
@@ -127,33 +119,13 @@ typedef struct block_t {
              deceleration_time,
              acceleration_time_inverse,     // Inverse of acceleration and deceleration periods, expressed as integer. Scale depends on CPU being used
              deceleration_time_inverse;
-  #else
-    uint32_t acceleration_rate;             // The acceleration rate used for acceleration calculation
-  #endif
 
   uint8_t direction_bits;                   // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
-
-  // Advance extrusion
-  #if ENABLED(LIN_ADVANCE)
-    bool use_advance_lead;
-    uint16_t advance_speed,                 // STEP timer value for extruder speed offset ISR
-             max_adv_steps,                 // max. advance steps to get cruising speed pressure (not always nominal_speed!)
-             final_adv_steps;               // advance steps due to exit speed
-    float e_D_ratio;
-  #endif
 
   uint32_t nominal_rate,                    // The nominal step rate for this block in step_events/sec
            initial_rate,                    // The jerk-adjusted step rate at start of block
            final_rate,                      // The minimal rate at exit
            acceleration_steps_per_s2;       // acceleration steps/sec^2
-
-  #if FAN_COUNT > 0
-    uint8_t fan_speed[FAN_COUNT];
-  #endif
-
-  #if ENABLED(BARICUDA)
-    uint8_t valve_pressure, e_to_p_pressure;
-  #endif
 
   uint32_t segment_time_us;
 

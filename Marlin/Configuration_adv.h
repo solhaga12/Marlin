@@ -1705,3 +1705,6 @@
 
 // Enable Marlin dev mode which adds some special commands
 //#define MARLIN_DEV_MODE
+
+// Show extra position information in M114
+#define M114_DETAIL

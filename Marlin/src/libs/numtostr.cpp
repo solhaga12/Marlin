@@ -242,7 +242,7 @@ char* ftostr41sign(const float &f) {
 
 // Convert signed float to string with 123.4 format
 char* ftostr41nosign(const float &f) {
-  long i = (f * 100 + (f < 0 ? -5: 5)) / 10;
+  long i = f * 10;
   conv[0] = DIGIMOD(i, 1000);
   conv[1] = DIGIMOD(i, 100);
   conv[2] = DIGIMOD(i, 10);
