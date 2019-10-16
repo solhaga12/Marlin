@@ -113,7 +113,6 @@ typedef struct block_t {
   uint32_t accelerate_until,                // The index of the step event on which to stop acceleration
            decelerate_after;                // The index of the step event on which to start decelerating
 
-  #if ENABLED(S_CURVE_ACCELERATION)
     uint32_t cruise_rate,                   // The actual cruise rate to use, between end of the acceleration phase and start of deceleration phase
              acceleration_time,             // Acceleration time and deceleration time in STEP timer counts
              deceleration_time,
