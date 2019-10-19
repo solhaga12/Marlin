@@ -7,10 +7,62 @@
 #include "../../module/voltages.h"
 #include "../../module/stepper.h"
 
+/*
+ * From the profile:
+ *
+ *   cutterOn:  "M106",     GCode command to turn on the plasma
+ *   cutterOff: "M107",     Gcode command to turn off the plasma
+ *   _thcVoltage: 125,      Set the V<thcVoltage> in V. M106 parameter
+ *   _delay: 100,           Set the D<delayTime> in ms. M106 parameter
+ *   _cutHeight: 1,5,       Set the H<cutHeight> in mm. M106 parameter
+ *   _initialHeight: 3,8,   Set the I<initialHeight> in mm. M106 parameter
+ */
+
 void GcodeSuite::M106() {
   uint16_t voltage = 125;
+  uint16_t delayTime = 100;
+  float height = 1.5;
+  float initialHeight = 3.8;
+
   #define WAIT_FOR_PLASMA_LOOP 100
   #define WAIT_FOR_PLASMA 10
+
+
+
+  if (parser.seen('V')) {
+    voltage = parser.value_byte();
+    if ((voltage < 50) || (voltage > 200)) {
+      voltage = 125;
+    }
+  }
+
+
+  if (parser.seen('D')) {
+    delayTime = parser.value_byte();
+    if (delayTime > 2000) {
+      delayTime = 100;
+    }
+  }
+
+  if (parser.seen('H')) {
+    height = parser.value_byte();
+    if ((height < 0.5) || (height > 10.0)) {
+      height = 1.5;
+    }
+  }
+
+  if (parser.seen('I')) {
+    initialHeight = parser.value_byte();
+    if ((initialHeight < 0.5) || (initialHeight > 10.0)) {
+      initialHeight = 3.8;
+    }
+  }
+
+  SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", delayTime, " H = ", height, " I = ", initialHeight);
+
+
+  voltageManager.setWantedThcVoltage(voltage * SLOPE);
+  stepper.synchronize();
 
   if (dryRun) {
     SERIAL_ECHOLN("Start dry run");
@@ -18,17 +70,6 @@ void GcodeSuite::M106() {
     voltageManager.disableThc();
     return;
   }
-
-  if (parser.seen('S')) {
-    voltage = parser.value_byte();
-    if ((voltage << 50) || (voltage >> 200)) {
-      voltage = 125;
-    }
-  }
-
-  SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage);
-  voltageManager.setWantedThcVoltage(voltage * SLOPE);
-  stepper.synchronize();
 
   // Start plasma torch and wait for arc transfer
   TURN_PLASMA_ON
