@@ -13,14 +13,14 @@
  *   cutterOn:  "M106",     GCode command to turn on the plasma
  *   cutterOff: "M107",     Gcode command to turn off the plasma
  *   _thcVoltage: 125,      Set the V<thcVoltage> in V. M106 parameter
- *   _delay: 100,           Set the D<delayTime> in ms. M106 parameter
+ *   _delay: 100,           Set the D<pierceDelay> in ms. M106 parameter
  *   _cutHeight: 1,5,       Set the H<cutHeight> in mm. M106 parameter
  *   _initialHeight: 3,8,   Set the I<initialHeight> in mm. M106 parameter
  */
 
 void GcodeSuite::M106() {
   uint16_t voltage = 125;
-  uint16_t delayTime = 100;
+  uint16_t pierceDelay = 100;
   float height = 1.5;
   float initialHeight = 3.8;
 
@@ -38,9 +38,9 @@ void GcodeSuite::M106() {
 
 
   if (parser.seen('D')) {
-    delayTime = parser.value_byte();
-    if (delayTime > 2000) {
-      delayTime = 100;
+    pierceDelay = parser.value_byte();
+    if (pierceDelay > 2000) {
+      pierceDelay = 100;
     }
   }
 
@@ -58,7 +58,7 @@ void GcodeSuite::M106() {
     }
   }
 
-  SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", delayTime, " H = ", height, " I = ", initialHeight);
+  SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", pierceDelay, " H = ", height, " I = ", initialHeight);
 
 
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
