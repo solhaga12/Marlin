@@ -50,6 +50,9 @@ char* i16tostr3left(const int16_t xx);
 // Convert signed int to rj string with _123, -123, _-12, or __-1 format
 char* i16tostr4sign(const int16_t x);
 
+// Convert unsigned float to string with 1.2 format
+char* ftostr11ns(const float &x);
+
 // Convert unsigned float to string with 1.23 format
 char* ftostr12ns(const float &x);
 

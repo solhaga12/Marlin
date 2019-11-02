@@ -134,6 +134,15 @@ char* i16tostr4sign(const int16_t i) {
   return &conv[3];
 }
 
+// Convert unsigned float to string with 1.2 format
+char* ftostr11ns(const float &f) {
+  const long i = ((f < 0 ? -f : f) * 1000 + 5) / 10;
+  conv[3] = DIGIMOD(i, 100);
+  conv[4] = '.';
+  conv[5] = DIGIMOD(i, 10);
+  return &conv[3];
+}
+
 // Convert unsigned float to string with 1.23 format
 char* ftostr12ns(const float &f) {
   const long i = ((f < 0 ? -f : f) * 1000 + 5) / 10;

@@ -67,7 +67,7 @@ void GcodeSuite::M106() {
   if (parser.seen('I')) {
     initialHeight = parser.value_byte();
     if ((initialHeight < 0.5) || (initialHeight > 10.0)) {
-      initialHeight = 3.8;
+      initialHeight = 3.8;;
     }
   }
 
@@ -76,11 +76,11 @@ void GcodeSuite::M106() {
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
 
   // Home Z and set initial height
-  //queue.inject_P(PSTR("G28 Z"));
   sprintf_P(gcode_string, PSTR("G28 Z"));
   process_subcommands_now(gcode_string);
-  sprintf_P(gcode_string, PSTR("G0 Z%4.3f"), initialHeight);
+  sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
+  process_subcommands_now("M114");
 
 
   if (!dryRun) {
@@ -113,8 +113,9 @@ void GcodeSuite::M106() {
 
   // Decend to cut height and then delay
   delay(pierceDelay);
-  sprintf_P(gcode_string, PSTR("G0 Z%4.3f"), height);
+  sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(height));
   process_subcommands_now(gcode_string);
+  process_subcommands_now("M114");
   delay(pierceDelay);
 }
 
