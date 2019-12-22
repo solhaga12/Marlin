@@ -428,57 +428,13 @@ void menu_motion() {
   //
   // Move Axis
   //
-  #if ENABLED(DELTA)
-    if (all_axes_homed())
-  #endif
       MENU_ITEM(submenu, MSG_MOVE_AXIS, menu_move);
 
   //
   // Auto Home
   //
   MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28 X Y Z"));
-  #if ENABLED(INDIVIDUAL_AXIS_HOMING_MENU)
-    MENU_ITEM(gcode, MSG_AUTO_HOME_X, PSTR("G28 X"));
-    MENU_ITEM(gcode, MSG_AUTO_HOME_Y, PSTR("G28 Y"));
-    MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
-  #endif
-
-  //
-  // Auto Z-Align
-  //
-  #if ENABLED(Z_STEPPER_AUTO_ALIGN)
-    MENU_ITEM(gcode, MSG_AUTO_Z_ALIGN, PSTR("G34"));
-  #endif
-
-  //
-  // Level Bed
-  //
-  #if ENABLED(AUTO_BED_LEVELING_UBL)
-
-    MENU_ITEM(submenu, MSG_UBL_LEVEL_BED, _lcd_ubl_level_bed);
-
-  #elif ENABLED(LCD_BED_LEVELING)
-
-    if (!g29_in_progress) MENU_ITEM(submenu, MSG_BED_LEVELING, menu_bed_leveling);
-
-  #elif HAS_LEVELING && DISABLED(SLIM_LCD_MENUS)
-
-    #if DISABLED(PROBE_MANUALLY)
-      MENU_ITEM(gcode, MSG_LEVEL_BED, PSTR("G28\nG29"));
-    #endif
-    if (all_axes_homed() && leveling_is_valid()) {
-      bool new_level_state = planner.leveling_active;
-      MENU_ITEM_EDIT_CALLBACK(bool, MSG_BED_LEVELING, &new_level_state, _lcd_toggle_bed_leveling);
-    }
-    #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
-      MENU_MULTIPLIER_ITEM_EDIT_CALLBACK(float3, MSG_Z_FADE_HEIGHT, &lcd_z_fade_height, 0, 100, _lcd_set_z_fade_height);
-    #endif
-
-  #endif
-
-  #if ENABLED(LEVEL_BED_CORNERS) && DISABLED(LCD_BED_LEVELING)
-    MENU_ITEM(function, MSG_LEVEL_CORNERS, _lcd_level_bed_corners);
-  #endif
+  MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
 
   //
   // Disable Steppers

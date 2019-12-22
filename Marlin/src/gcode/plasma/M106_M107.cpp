@@ -40,15 +40,12 @@ void GcodeSuite::M106() {
   #define WAIT_FOR_PLASMA_LOOP 100
   #define WAIT_FOR_PLASMA 10
 
-
-
   if (parser.seen('V')) {
     voltage = parser.value_byte();
     if ((voltage < 50) || (voltage > 200)) {
       voltage = 125;
     }
   }
-
 
   if (parser.seen('D')) {
     pierceDelay = parser.value_byte();
@@ -111,12 +108,11 @@ void GcodeSuite::M106() {
     voltageManager.disableThc();
   }
 
-  // Decend to cut height and then delay
+  // Delay for pierce and then descend to cut height
   delay(pierceDelay);
   sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(height));
   process_subcommands_now(gcode_string);
   process_subcommands_now("M114");
-  delay(pierceDelay);
 }
 
 void GcodeSuite::M107() {
