@@ -435,6 +435,7 @@ void menu_motion() {
   //
   MENU_ITEM(gcode, MSG_AUTO_HOME, PSTR("G28 X Y Z"));
   MENU_ITEM(gcode, MSG_AUTO_HOME_Z, PSTR("G28 Z"));
+  // Added Z home
 
   //
   // Disable Steppers
