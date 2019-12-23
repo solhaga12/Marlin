@@ -414,9 +414,6 @@ void menu_move() {
   END_MENU();
 }
 
-void _lcd_ubl_level_bed();
-void menu_bed_leveling();
-
 void menu_motion() {
   START_MENU();
 
