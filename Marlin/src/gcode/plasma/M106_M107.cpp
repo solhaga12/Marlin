@@ -77,8 +77,6 @@ void GcodeSuite::M106() {
   process_subcommands_now(gcode_string);
   sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
-  process_subcommands_now("M114");
-
 
   if (!dryRun) {
   // Start plasma torch and wait for arc transfer
@@ -112,7 +110,6 @@ void GcodeSuite::M106() {
   delay(pierceDelay);
   sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(height));
   process_subcommands_now(gcode_string);
-  process_subcommands_now("M114");
 }
 
 void GcodeSuite::M107() {
