@@ -38,7 +38,7 @@ void GcodeSuite::M106() {
   char gcode_string[80];
 
   #define WAIT_FOR_PLASMA_LOOP 100
-  #define WAIT_FOR_PLASMA 10
+  #define WAIT_FOR_PLASMA 30
 
   if (parser.seen('V')) {
     voltage = parser.value_byte();
