@@ -73,8 +73,8 @@ void GcodeSuite::M106() {
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
 
   // Home Z and set initial height
-  sprintf_P(gcode_string, PSTR("G28 Z"));
-  process_subcommands_now(gcode_string);
+  // sprintf_P(gcode_string, PSTR("G28 Z"));
+  // process_subcommands_now(gcode_string);
   sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
 
