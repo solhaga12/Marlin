@@ -107,7 +107,9 @@ void GcodeSuite::M106() {
   }
 
   // Delay for pierce and then descend to cut height
-  delay(pierceDelay);
+  if (pierceDelay != 0 ) {
+	  delay(pierceDelay);
+  }
   sprintf_P(gcode_string, PSTR("G0 Z%s F1200"), ftostr11ns(height));
   process_subcommands_now(gcode_string);
 }
