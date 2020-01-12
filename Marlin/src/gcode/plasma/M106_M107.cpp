@@ -69,9 +69,7 @@ void GcodeSuite::M106() {
   }
 
   SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", pierceDelay, " H = ", height, " I = ", initialHeight);
-  if (dryRun) {
-      SERIAL_ECHOLN("Dry run!");
-  }
+
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
 
   // Home Z and set initial height
@@ -101,7 +99,7 @@ void GcodeSuite::M106() {
     }
   }
   else {
-    SERIAL_ECHOLN("Start dry run");
+    SERIAL_ECHOLN("Dry run");
     TURN_PLASMA_OFF
     voltageManager.disableThc();
   }
@@ -115,12 +113,6 @@ void GcodeSuite::M106() {
 }
 
 void GcodeSuite::M107() {
-
-  if (dryRun) {
-    SERIAL_ECHOLN("Stop dry run");
-    dryRun = false;
-    return;
-  }
 
   SERIAL_ECHOLN("PLASMA STOP");
   TURN_PLASMA_OFF
