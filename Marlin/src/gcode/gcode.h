@@ -123,7 +123,7 @@
  * M100 - Watch Free Memory (for debugging) (Requires M100_FREE_MEMORY_WATCHER)
  * M104 - Set extruder target temp.
  * M105 - Report current temperatures.
- * M106 - Plasma cutter on, S<Voltage>.
+ * M106 - Plasma cutter on, V<Voltage> D<Delay> H<Height> I<InitialHeight>
  * M107 - Plasma cutter off.
  * M108 - Break out of heating loops (M109, M190, M303). With no controller, breaks out of M0/M1. (Requires EMERGENCY_PARSER)
  * M109 - S<temp> Wait for extruder current temp to reach target temp. ** Wait only when heating! **

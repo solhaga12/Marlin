@@ -55,27 +55,28 @@ void GcodeSuite::M106() {
   }
 
   if (parser.seen('H')) {
-    height = parser.value_byte();
+    height = parser.value_float();
     if ((height < 0.5) || (height > 10.0)) {
       height = 1.5;
     }
   }
 
   if (parser.seen('I')) {
-    initialHeight = parser.value_byte();
+    initialHeight = parser.value_float();
     if ((initialHeight < 0.5) || (initialHeight > 10.0)) {
       initialHeight = 3.8;;
     }
   }
 
   SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", pierceDelay, " H = ", height, " I = ", initialHeight);
-
+  if (dryRun) {
+      SERIAL_ECHOLN("Dry run!");
+  }
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
 
   // Home Z and set initial height
   sprintf_P(gcode_string, PSTR("G0 Z%s F1200"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
-  SERIAL_ECHOLNPAIR("Sub command: ", gcode_string);
 
   if (!dryRun) {
   // Start plasma torch and wait for arc transfer
