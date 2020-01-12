@@ -37,8 +37,8 @@ void GcodeSuite::M106() {
   float initialHeight = 3.8;
   char gcode_string[80];
 
-  #define WAIT_FOR_PLASMA_LOOP 200
-  #define WAIT_FOR_PLASMA 200
+  #define WAIT_FOR_PLASMA_LOOP 100
+  #define WAIT_FOR_PLASMA 30
 
   if (parser.seen('V')) {
     voltage = parser.value_byte();
@@ -73,10 +73,9 @@ void GcodeSuite::M106() {
   voltageManager.setWantedThcVoltage(voltage * SLOPE);
 
   // Home Z and set initial height
-  // sprintf_P(gcode_string, PSTR("G28 Z"));
-  // process_subcommands_now(gcode_string);
   sprintf_P(gcode_string, PSTR("G0 Z%s F1200"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
+  SERIAL_ECHOLNPAIR("Sub command: ", gcode_string);
 
   if (!dryRun) {
   // Start plasma torch and wait for arc transfer
