@@ -75,7 +75,7 @@ void GcodeSuite::M106() {
   // Home Z and set initial height
   // sprintf_P(gcode_string, PSTR("G28 Z"));
   // process_subcommands_now(gcode_string);
-  sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(initialHeight));
+  sprintf_P(gcode_string, PSTR("G0 Z%s F1800"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
 
   if (!dryRun) {
@@ -108,7 +108,7 @@ void GcodeSuite::M106() {
 
   // Delay for pierce and then descend to cut height
   delay(pierceDelay);
-  sprintf_P(gcode_string, PSTR("G0 Z%s"), ftostr11ns(height));
+  sprintf_P(gcode_string, PSTR("G0 Z%s F1200"), ftostr11ns(height));
   process_subcommands_now(gcode_string);
 }
 
