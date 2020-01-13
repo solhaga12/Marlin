@@ -80,8 +80,8 @@ void GcodeSuite::M106() {
   // Start plasma torch and wait for arc transfer
   TURN_PLASMA_ON
   SERIAL_ECHOLN("PLASMA START");
-
-    for (uint8_t wait = 0; wait < WAIT_FOR_PLASMA; wait++) {
+    uint8_t wait;
+    for (wait = 0; wait < WAIT_FOR_PLASMA; wait++) {
       if (IS_PLASMA_TRANSFERRED)
       {
         SERIAL_ECHOLN("PLASMA TRANSFER");
@@ -90,7 +90,7 @@ void GcodeSuite::M106() {
       }
       delay(WAIT_FOR_PLASMA_LOOP);
     }
-    if (!IS_PLASMA_TRANSFERRED) {
+    if (wait == WAIT_FOR_PLASMA) {
       SERIAL_ECHOLN("Plasma did not start");
       TURN_PLASMA_OFF
       SERIAL_ECHOLN("PLASMA STOP");
