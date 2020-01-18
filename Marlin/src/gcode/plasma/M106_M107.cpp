@@ -117,5 +117,7 @@ void GcodeSuite::M107() {
   SERIAL_ECHOLN("PLASMA STOP");
   TURN_PLASMA_OFF
   voltageManager.disableThc();
+  // Raise head to be able to travel
+  process_subcommands_now("G0 Z2");
   stepper.synchronize();
 }
