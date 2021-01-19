@@ -76,9 +76,9 @@
 #endif
 
 #ifdef Z_STALL_SENSITIVITY
-  #define Z_STOP_PIN                  Z_DIAG_PIN
+  #define Z_STOP_PIN                  Z_MIN_PROBE_PIN
   #if Z_HOME_DIR < 0
-    #define Z_MAX_PIN                      P1_00  // PWRDET
+    #define Z_MAX_PIN                      Z_DIAG_PIN  // PWRDET
   #else
     #define Z_MIN_PIN                      P1_00  // PWRDET
   #endif
@@ -92,7 +92,7 @@
 // Z Probe (when not Z_MIN_PIN)
 //
 #ifndef Z_MIN_PROBE_PIN
-  #define Z_MIN_PROBE_PIN                  P0_10
+  #define Z_MIN_PROBE_PIN                  P1_00
 #endif
 
 //
@@ -112,7 +112,7 @@
 // Power Loss Detection
 //
 #ifndef POWER_LOSS_PIN
-  #define POWER_LOSS_PIN                   P1_00  // PWRDET
+  // #define POWER_LOSS_PIN                   P1_00  // PWRDET
 #endif
 
 //
