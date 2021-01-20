@@ -2424,16 +2424,16 @@
 //=================================== Plasma ==================================
 //=============================================================================
 
-#define PLASMA_START_PIN  63 // Plasma start relay, output
-#define PLASMA_TRANSFER_PIN 40	// Plasma transfer, input
-#define PLASMA_VD_UPDATES_PIN 42     // Plasma update Voltage Divider, output
+#define PLASMA_START_PIN  P2_00 // Plasma start relay, output.
+#define PLASMA_TRANSFER_PIN P0_10	// Plasma transfer, input. Plasma is ready to receive gcode
+#define PLASMA_VD_UPDATES_PIN P1_24 // Plasma update; to see the sample time on an oscilloscope
 
 #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
 #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
 
 #define PLASMA_TRANSFER_TIMEOUT_MS 1000
 
-#define PLASMA_VOLTAGE_DIVIDER_PLUS_PIN 3   // analog input
-#define PLASMA_VOLTAGE_DIVIDER_MINUS_PIN 4  // analog input
+#define PLASMA_VOLTAGE_DIVIDER_PLUS_PIN P0_23_A1   // Voltage divider plus, analog input
+#define PLASMA_VOLTAGE_DIVIDER_MINUS_PIN P0_24_A2  // Voltage divider minus, analog input
 
 #define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
