@@ -53,6 +53,13 @@
 #include "module/stepper.h"
 #include "module/stepper/indirection.h"
 
+#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+  #include "module/plasma.h"
+#endif
+#if PLASMA_THC
+  #include "module/torch_height_controller.h"
+#endif
+
 #include "gcode/gcode.h"
 #include "gcode/parser.h"
 #include "gcode/queue.h"
@@ -1098,7 +1105,17 @@ void setup() {
 
   sync_plan_position();               // Vital to init stepper/planner equivalent for current_position
 
-  SETUP_RUN(thermalManager.init());   // Initialize temperature loop
+  #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+    SETUP_RUN(plasmaManager.init());    // Initialize plasma
+  #endif
+
+  #if PLASMA_THC
+    // Something here? Perhaps remove thermalManager?
+  #endif
+
+  #ifndef PLASMA_THC
+    SETUP_RUN(thermalManager.init());   // Initialize temperature loop
+  #endif
 
   SETUP_RUN(print_job_timer.init());  // Initial setup of print job timer
 

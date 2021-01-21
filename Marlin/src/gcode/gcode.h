@@ -285,6 +285,19 @@
  * M995 - Touch screen calibration for TFT display
  * M997 - Perform in-application firmware update
  * M999 - Restart after being stopped by error
+ *
+ * ************ Plasma gcodes
+ * M2101 - 
+ * M2102
+ * M2103
+ * M2104
+ * M2105
+ * M2106 - Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
+ * M2107 - Stop plasma cutter
+ * M2108
+ * M2109
+ * M2110
+ * 
  * D... - Custom Development G-code. Add hooks to 'gcode_D.cpp' for developers to test features. (Requires MARLIN_DEV_MODE)
  *
  * "T" Codes
@@ -857,6 +870,12 @@ private:
         static void M910();
       #endif
     #endif
+  #endif
+
+  // Plasma
+  #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+    static void M2106();                                 // M106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
+    static void M2107();                                  // M107: Stop plasma cutter
   #endif
 
   TERN_(SDSUPPORT, static void M928());

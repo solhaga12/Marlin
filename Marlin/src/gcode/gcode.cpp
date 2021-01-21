@@ -918,7 +918,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ENABLED(SDSUPPORT)
         case 1001: M1001(); break;                                // M1001: [INTERNAL] Handle SD completion
       #endif
-
+      
+      // Plasma
+      #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+        case 2106: M2106(); break;                                  // M106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
+        case 2107: M2107(); break;                                  // M107: Stop plasma cutter
+      #endif
       #if ENABLED(MAX7219_GCODE)
         case 7219: M7219(); break;                                // M7219: Set LEDs, columns, and rows
       #endif

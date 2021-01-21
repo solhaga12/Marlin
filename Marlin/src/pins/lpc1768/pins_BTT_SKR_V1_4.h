@@ -154,7 +154,7 @@
 #endif
 
 //#define TEMP_1_PIN                      P0_23_A0  // A0 (T0) - (67) - TEMP_1_PIN
-#define TEMP_BED_PIN                    P0_25_A2  // A2 (T2) - (69) - TEMP_BED_PIN
+//#define TEMP_BED_PIN                    P0_25_A2  // A2 (T2) - (69) - TEMP_BED_PIN
 
 //
 // Software SPI pins for TMC2130 stepper drivers
@@ -429,6 +429,15 @@
  *   P0_28  (58) (Open collector)
  */
 
+// Plasma
+#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+#define PLASMA_START_PIN  P2_00 // Plasma start relay, output.
+#define PLASMA_TRANSFER_PIN P0_10	// Plasma transfer, input. Plasma is ready to receive gcode
+#define PLASMA_VD_UPDATES_PIN P1_24 // Plasma update; to see the sample time on an oscilloscope
+
+#define VOLTAGE_DIVIDER_PLUS_PIN P0_23_A0   // Voltage divider plus, analog input
+#define VOLTAGE_DIVIDER_MINUS_PIN P0_24_A1  // Voltage divider minus, analog input
+#endif
 //
 // Include common SKR pins
 //

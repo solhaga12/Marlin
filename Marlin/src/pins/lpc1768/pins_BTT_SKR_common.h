@@ -56,7 +56,7 @@
   //#define TEMP_1_PIN                    P0_23_A2  // A2 (T2) - (69) - TEMP_1_PIN, this is now used for THC+
 #endif
 #ifndef TEMP_BED_PIN
-  #define TEMP_BED_PIN                  P0_25_A0  // A0 (T0) - (67) - TEMP_BED_PIN
+  //#define TEMP_BED_PIN                  P0_25_A0  // A0 (T0) - (67) - TEMP_BED_PIN
 #endif
 
 #if HOTENDS == 1
@@ -83,7 +83,7 @@
   #endif
 #endif
 #ifndef FAN_PIN
-  #define FAN_PIN                          P2_03  // This is now used as the PLASMA_START_PIN
+  #define FAN_PIN                          P2_03
 #endif
 #ifndef HEATER_BED_PIN
   #define HEATER_BED_PIN                   P2_05

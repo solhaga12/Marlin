@@ -2423,17 +2423,15 @@
 //=============================================================================
 //=================================== Plasma ==================================
 //=============================================================================
+#define MPCNC_PLASMA 1
+//#define COREXY_PLASMA 1
+//#define PLASMA_THC 1
+#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+  #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
+  #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
 
-#define PLASMA_START_PIN  P2_00 // Plasma start relay, output.
-#define PLASMA_TRANSFER_PIN P0_10	// Plasma transfer, input. Plasma is ready to receive gcode
-#define PLASMA_VD_UPDATES_PIN P1_24 // Plasma update; to see the sample time on an oscilloscope
-
-#define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
-#define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
-
-#define PLASMA_TRANSFER_TIMEOUT_MS 1000
-
-#define PLASMA_VOLTAGE_DIVIDER_PLUS_PIN P0_23_A1   // Voltage divider plus, analog input
-#define PLASMA_VOLTAGE_DIVIDER_MINUS_PIN P0_24_A2  // Voltage divider minus, analog input
-
-#define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
+  #define PLASMA_TRANSFER_TIMEOUT_MS 1000
+  #if PLASMA_THC
+    #define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
+  #endif
+#endif
