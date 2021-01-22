@@ -39,10 +39,22 @@
 #include "../../module/planner.h"
 #include "../../libs/numtostr.h"
 
+void GcodeSuite::M2101() {
+
+  if (parser.seen('S')) {
+    switch (parser.value_byte()) {
+      case 0: plasmaManager.setDryRun(false); break;
+      case 1: plasmaManager.setDryRun(true); break;
+    }
+  }
+  else {
+    SERIAL_ECHOLNPAIR("Plasma ", plasmaManager.getDryRun() ? "is dry running." : "can cut.");
+  }
+}
+
 void GcodeSuite::M2106() {
   uint16_t voltage = 125;
   uint16_t pierceDelay = 100;
-  bool dryRun = false;
   float height = 1.5;
   float initialHeight = 3.8;
   char gcode_string[80];
@@ -83,12 +95,13 @@ void GcodeSuite::M2106() {
   #if PLASMA_THC
     plasmaManager.setWantedThcVoltage(voltage * SLOPE);
   #endif
-
-  // Home Z and set initial height
+  
+  // gcode homes Z
+  // Set Z initial height
   sprintf_P(gcode_string, PSTR("G0 Z%s F1200"), ftostr11ns(initialHeight));
   process_subcommands_now(gcode_string);
 
-  if (dryRun == false) {
+  if (plasmaManager.getDryRun() == false) {
   // Start plasma torch and wait for arc transfer
   TURN_PLASMA_ON
   SERIAL_ECHOLN("PLASMA START");
@@ -105,17 +118,17 @@ void GcodeSuite::M2106() {
       delay(WAIT_FOR_PLASMA_LOOP);
     }
     if (wait == WAIT_FOR_PLASMA) {
-      SERIAL_ECHOLN("Plasma did not start");
+      SERIAL_ECHOLN("Plasma did not start.");
+      SERIAL_ECHOLN("Dry run");
       TURN_PLASMA_OFF
       SERIAL_ECHOLN("PLASMA STOP");
       #if PLASMA_THC
         plasmaManager.disableThc();
       #endif
-      dryRun = true;
+      plasmaManager.setDryRun(true);
     }
   }
   else {
-    SERIAL_ECHOLN("Dry run");
     TURN_PLASMA_OFF
     #if PLASMA_THC
       plasmaManager.disableThc();
@@ -134,6 +147,7 @@ void GcodeSuite::M2107() {
 
   SERIAL_ECHOLN("PLASMA STOP");
   TURN_PLASMA_OFF
+  //plasmaManager.setDryRun(false);
   #if PLASMA_THC
     plasmaManager.disableThc();
   #endif

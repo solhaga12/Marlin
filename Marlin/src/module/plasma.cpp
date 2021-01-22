@@ -44,6 +44,17 @@ uint16_t Plasma::wantedThcVoltage = uint16_t();
 
 bool Plasma::runThc = bool();
 #endif
+bool Plasma::dryRun = bool();
+
+
+void Plasma::setDryRun(bool _dryRun) {
+
+	dryRun = _dryRun;
+}
+
+bool Plasma::getDryRun() {
+  return dryRun;
+}
 
 /**
  * Get average (avr) voltages

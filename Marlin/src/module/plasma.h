@@ -62,6 +62,9 @@ class Plasma {
     static void enableThc(void);
     static void disableThc(void);
     #endif
+    static void setDryRun(bool dryRun);
+    static bool getDryRun();
+
 
   private:
   #if PLASMA_THC
@@ -74,6 +77,7 @@ class Plasma {
     #define OFFSET 23
     #define SLOPE 5.0
   #endif
+    static bool dryRun;
 
   public:
     /**
@@ -106,6 +110,7 @@ class Plasma {
       #endif
 
       SET_OUTPUT(PLASMA_START_PIN);
+      TURN_PLASMA_OFF;
       SET_OUTPUT(PLASMA_VD_UPDATES_PIN);
       SET_INPUT_PULLUP(PLASMA_TRANSFER_PIN);
 
@@ -113,6 +118,7 @@ class Plasma {
       wantedThcVoltage = 100 * SLOPE;
       runThc = false;
       #endif
+      dryRun = false;
     }
 
     /**
