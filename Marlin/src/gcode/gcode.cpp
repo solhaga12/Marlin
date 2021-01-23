@@ -921,10 +921,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       
       // Plasma
       #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
-        case 2101: M2101(); break;                                  // Set or get dry run. M2101 S0/S1, false/true
-        case 2106: M2106(); break;                                  // M106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
-        case 2107: M2107(); break;                                  // M107: Stop plasma cutter
+        case 2101: M2101(); break;                                  // M2101: Set or get dry run. S0/S1, false/true
+        case 2102: M2102(); break;                                  // M2102: Get actual THC voltage
+        case 2106: M2106(); break;                                  // M2106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
+        case 2107: M2107(); break;                                  // M2107: Stop plasma cutter
       #endif
+      
       #if ENABLED(MAX7219_GCODE)
         case 7219: M7219(); break;                                // M7219: Set LEDs, columns, and rows
       #endif

@@ -52,6 +52,11 @@ void GcodeSuite::M2101() {
   }
 }
 
+void GcodeSuite::M2102() {
+// Just for test
+  SERIAL_ECHOLNPAIR("THC voltage is ", "78");
+}
+
 void GcodeSuite::M2106() {
   uint16_t voltage = 125;
   uint16_t pierceDelay = 100;
