@@ -130,8 +130,26 @@
   #define MOTHERBOARD BOARD_BTT_SKR_V1_4_TURBO
 #endif
 
+//=============================================================================
+//=================================== Plasma ==================================
+//=============================================================================
+#define MPCNC_PLASMA 1
+//#define COREXY_PLASMA 1
+//#define PLASMA_THC 1
+#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+  #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
+  #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
+
+  #define PLASMA_TRANSFER_TIMEOUT_MS 1000
+  #if PLASMA_THC
+    #define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
+  #endif
+#endif
+
 // Name displayed in the LCD "Ready" message and Info menu
-#define CUSTOM_MACHINE_NAME "MPCNC Plasma"
+#if MPCNC_PLASMA
+  #define CUSTOM_MACHINE_NAME "MPCNC Plasma"
+#endif
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
@@ -625,7 +643,7 @@
 #define USE_ZMIN_PLUG
 #define USE_XMAX_PLUG
 #define USE_YMAX_PLUG
-#define USE_ZMAX_PLUG
+//#define USE_ZMAX_PLUG
 
 // Enable pullup for all endstops to prevent a floating state
 #define ENDSTOPPULLUPS
@@ -660,7 +678,7 @@
 #define X_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Z_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
-#define Z_MIN_PROBE_ENDSTOP_INVERTING true // Set to true to invert the logic of the probe.
+#define Z_MIN_PROBE_ENDSTOP_INVERTING false // Set to true to invert the logic of the probe.
 
 /**
  * Stepper Drivers
@@ -741,7 +759,9 @@
  * Override with M92
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
+#if MPCNC_PLASMA
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
+#endif
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -1087,10 +1107,11 @@
 // @section machine
 
 // Invert the stepper direction. Change (or reverse the motor connector) if an axis goes the wrong way.
-#define INVERT_X_DIR false
-#define INVERT_Y_DIR true
-#define INVERT_Z_DIR false
-
+#if MPCNC_PLASMA
+  #define INVERT_X_DIR true
+  #define INVERT_Y_DIR false
+  #define INVERT_Z_DIR false
+#endif
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
@@ -1123,8 +1144,8 @@
 // @section machine
 
 // The size of the print bed
-#define X_BED_SIZE 1100
-#define Y_BED_SIZE 600
+#define X_BED_SIZE 1040
+#define Y_BED_SIZE 530
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
@@ -1132,7 +1153,9 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 150
+#if MPCNC_PLASMA
+  #define Z_MAX_POS 10
+#endif
 
 /**
  * Software Endstops
@@ -2419,19 +2442,3 @@
 
 // Edit servo angles with M281 and save to EEPROM with M500
 //#define EDITABLE_SERVO_ANGLES
-
-//=============================================================================
-//=================================== Plasma ==================================
-//=============================================================================
-#define MPCNC_PLASMA 1
-//#define COREXY_PLASMA 1
-//#define PLASMA_THC 1
-#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
-  #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
-  #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
-
-  #define PLASMA_TRANSFER_TIMEOUT_MS 1000
-  #if PLASMA_THC
-    #define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
-  #endif
-#endif

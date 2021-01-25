@@ -2259,48 +2259,49 @@
  * https://github.com/teemuatlut/TMCStepper
  */
 #if HAS_TRINAMIC_CONFIG
+    #if MPCNC_PLASMA
+    #define HOLD_MULTIPLIER    0.1  // Scales down the holding current from run current
+    #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
-  #define HOLD_MULTIPLIER    0.1  // Scales down the holding current from run current
-  #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
+    #if AXIS_IS_TMC(X)
+      #define X_CURRENT       1400        // (mA) RMS current. Multiply by 1.414 for peak current.
+      #define X_CURRENT_HOME  600  // (mA) RMS current for sensorless homing
+      #define X_MICROSTEPS     256    // 0..256
+      #define X_RSENSE          0.11
+      #define X_CHAIN_POS      -1    // <=0 : Not chained. 1 : MCU MOSI connected. 2 : Next in chain, ...
+    #endif
 
-  #if AXIS_IS_TMC(X)
-    #define X_CURRENT       1400        // (mA) RMS current. Multiply by 1.414 for peak current.
-    #define X_CURRENT_HOME  600  // (mA) RMS current for sensorless homing
-    #define X_MICROSTEPS     256    // 0..256
-    #define X_RSENSE          0.11
-    #define X_CHAIN_POS      -1    // <=0 : Not chained. 1 : MCU MOSI connected. 2 : Next in chain, ...
-  #endif
+    #if AXIS_IS_TMC(X2)
+      #define X2_CURRENT      1400
+      #define X2_CURRENT_HOME 600
+      #define X2_MICROSTEPS    256
+      #define X2_RSENSE         0.11
+      #define X2_CHAIN_POS     -1
+    #endif
 
-  #if AXIS_IS_TMC(X2)
-    #define X2_CURRENT      1400
-    #define X2_CURRENT_HOME 600
-    #define X2_MICROSTEPS    256
-    #define X2_RSENSE         0.11
-    #define X2_CHAIN_POS     -1
-  #endif
+    #if AXIS_IS_TMC(Y)
+      #define Y_CURRENT       1400
+      #define Y_CURRENT_HOME  600
+      #define Y_MICROSTEPS     256
+      #define Y_RSENSE          0.11
+      #define Y_CHAIN_POS      -1
+    #endif
 
-  #if AXIS_IS_TMC(Y)
-    #define Y_CURRENT       1400
-    #define Y_CURRENT_HOME  600
-    #define Y_MICROSTEPS     256
-    #define Y_RSENSE          0.11
-    #define Y_CHAIN_POS      -1
-  #endif
+    #if AXIS_IS_TMC(Y2)
+      #define Y2_CURRENT      1400
+      #define Y2_CURRENT_HOME 600
+      #define Y2_MICROSTEPS    256
+      #define Y2_RSENSE         0.11
+      #define Y2_CHAIN_POS     -1
+    #endif
 
-  #if AXIS_IS_TMC(Y2)
-    #define Y2_CURRENT      1400
-    #define Y2_CURRENT_HOME 600
-    #define Y2_MICROSTEPS    256
-    #define Y2_RSENSE         0.11
-    #define Y2_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(Z)
-    #define Z_CURRENT       1400
-    #define Z_CURRENT_HOME  600
-    #define Z_MICROSTEPS     256
-    #define Z_RSENSE          0.11
-    #define Z_CHAIN_POS      -1
+    #if AXIS_IS_TMC(Z)
+      #define Z_CURRENT       1400
+      #define Z_CURRENT_HOME  600
+      #define Z_MICROSTEPS     256
+      #define Z_RSENSE          0.11
+      #define Z_CHAIN_POS      -1
+    #endif
   #endif
 
   #if AXIS_IS_TMC(Z2)
@@ -2550,11 +2551,13 @@
 
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
-    #define X_STALL_SENSITIVITY  80
-    #define X2_STALL_SENSITIVITY 80
-    #define Y_STALL_SENSITIVITY  80
-    #define Y2_STALL_SENSITIVITY 80
-    #define Z_STALL_SENSITIVITY  80
+    #if MPCNC_PLASMA
+      #define X_STALL_SENSITIVITY  47
+      #define X2_STALL_SENSITIVITY 47
+      #define Y_STALL_SENSITIVITY  52
+      #define Y2_STALL_SENSITIVITY 52
+      #define Z_STALL_SENSITIVITY  80
+    #endif
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
