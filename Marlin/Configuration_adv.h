@@ -2309,7 +2309,7 @@
     #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
     #if AXIS_IS_TMC(X)
-      #define X_CURRENT       1400        // (mA) RMS current. Multiply by 1.414 for peak current.
+      #define X_CURRENT       1800        // (mA) RMS current. Multiply by 1.414 for peak current.
       #define X_CURRENT_HOME  600  // (mA) RMS current for sensorless homing
       #define X_MICROSTEPS     256    // 0..256
       #define X_RSENSE          0.11
@@ -2317,7 +2317,7 @@
     #endif
 
     #if AXIS_IS_TMC(Y)
-      #define Y_CURRENT       1400
+      #define Y_CURRENT       1800
       #define Y_CURRENT_HOME  600
       #define Y_MICROSTEPS     256
       #define Y_RSENSE          0.11
@@ -2511,8 +2511,8 @@
       #define Z_STALL_SENSITIVITY  80
     #endif
     #if COREXY_PLASMA
-      #define X_STALL_SENSITIVITY  47
-      #define Y_STALL_SENSITIVITY  52
+      #define X_STALL_SENSITIVITY  80
+      #define Y_STALL_SENSITIVITY  80
       #define Z_STALL_SENSITIVITY  80
     #endif
     //#define IMPROVE_HOMING_RELIABILITY
