@@ -133,8 +133,8 @@
 //=============================================================================
 //=================================== Plasma ==================================
 //=============================================================================
-#define MPCNC_PLASMA 1
-//#define COREXY_PLASMA 1
+//#define MPCNC_PLASMA 1
+#define COREXY_PLASMA 1
 //#define PLASMA_THC 1
 #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
   #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
@@ -149,6 +149,9 @@
 // Name displayed in the LCD "Ready" message and Info menu
 #if MPCNC_PLASMA
   #define CUSTOM_MACHINE_NAME "MPCNC Plasma"
+#endif
+#if COREXY_PLASMA
+  #define CUSTOM_MACHINE_NAME "CoreXY Plasma"
 #endif
 
 // Printer's unique ID, used by some programs to differentiate between machines.
@@ -621,7 +624,9 @@
 
 // Enable one of the options below for CoreXY, CoreXZ, or CoreYZ kinematics,
 // either in the usual order or reversed
-//#define COREXY
+#if COREXY_PLASMA
+  #define COREXY
+#endif
 //#define COREXZ
 //#define COREYZ
 //#define COREYX
@@ -762,14 +767,22 @@
 #if MPCNC_PLASMA
   #define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
 #endif
+#if COREXY_PLASMA
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
+#endif
+
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-
-#define DEFAULT_MAX_FEEDRATE          { 140, 140, 30, 25 }
+#if MPCNC_PLASMA
+  #define DEFAULT_MAX_FEEDRATE          { 140, 140, 30, 25 }
+#endif
+#if COREXY_PLASMA
+  #define DEFAULT_MAX_FEEDRATE          { 140, 140, 30, 25 }
+#endif
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -782,7 +795,12 @@
  * Override with M201
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 200, 200, 200, 2000 }
+#if MPCNC_PLASMA
+  #define DEFAULT_MAX_ACCELERATION      { 200, 200, 200, 2000 }
+#endif
+#if COREXY_PLASMA
+  #define DEFAULT_MAX_ACCELERATION      { 200, 200, 200, 2000 }
+#endif
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1112,6 +1130,11 @@
   #define INVERT_Y_DIR false
   #define INVERT_Z_DIR false
 #endif
+#if COREXY_PLASMA
+  #define INVERT_X_DIR true
+  #define INVERT_Y_DIR false
+  #define INVERT_Z_DIR false
+#endif
 // @section extruder
 
 // For direct drive extruder v9 set to true, for geared extruder set to false.
@@ -1154,6 +1177,9 @@
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
 #if MPCNC_PLASMA
+  #define Z_MAX_POS 110
+#endif
+#if COREXY_PLASMA
   #define Z_MAX_POS 110
 #endif
 

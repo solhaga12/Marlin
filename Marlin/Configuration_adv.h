@@ -549,27 +549,27 @@
  * this offset is applied to the X2 motor. To find the offset home the X axis, and measure the error
  * in X2. Dual endstop offsets can be set at runtime with 'M666 X<offset> Y<offset> Z<offset>'.
  */
+#if MPCNC_PLASMA
+  #define X_DUAL_STEPPER_DRIVERS
+  #if ENABLED(X_DUAL_STEPPER_DRIVERS)
+    #define INVERT_X2_VS_X_DIR true   // Set 'true' if X motors should rotate in opposite directions
+    #define X_DUAL_ENDSTOPS
+    #if ENABLED(X_DUAL_ENDSTOPS)
+      #define X2_USE_ENDSTOP _XMAX_
+      #define X2_ENDSTOP_ADJUSTMENT  0
+    #endif
+  #endif
 
-#define X_DUAL_STEPPER_DRIVERS
-#if ENABLED(X_DUAL_STEPPER_DRIVERS)
-  #define INVERT_X2_VS_X_DIR true   // Set 'true' if X motors should rotate in opposite directions
-  #define X_DUAL_ENDSTOPS
-  #if ENABLED(X_DUAL_ENDSTOPS)
-    #define X2_USE_ENDSTOP _XMAX_
-    #define X2_ENDSTOP_ADJUSTMENT  0
+  #define Y_DUAL_STEPPER_DRIVERS
+  #if ENABLED(Y_DUAL_STEPPER_DRIVERS)
+    #define INVERT_Y2_VS_Y_DIR true   // Set 'true' if Y motors should rotate in opposite directions
+    #define Y_DUAL_ENDSTOPS
+    #if ENABLED(Y_DUAL_ENDSTOPS)
+      #define Y2_USE_ENDSTOP _YMAX_
+      #define Y2_ENDSTOP_ADJUSTMENT  0
+    #endif
   #endif
 #endif
-
-#define Y_DUAL_STEPPER_DRIVERS
-#if ENABLED(Y_DUAL_STEPPER_DRIVERS)
-  #define INVERT_Y2_VS_Y_DIR true   // Set 'true' if Y motors should rotate in opposite directions
-  #define Y_DUAL_ENDSTOPS
-  #if ENABLED(Y_DUAL_ENDSTOPS)
-    #define Y2_USE_ENDSTOP _YMAX_
-    #define Y2_ENDSTOP_ADJUSTMENT  0
-  #endif
-#endif
-
 //
 // For Z set the number of stepper drivers
 //
@@ -2259,7 +2259,7 @@
  * https://github.com/teemuatlut/TMCStepper
  */
 #if HAS_TRINAMIC_CONFIG
-    #if MPCNC_PLASMA
+  #if MPCNC_PLASMA
     #define HOLD_MULTIPLIER    0.1  // Scales down the holding current from run current
     #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
@@ -2304,85 +2304,37 @@
     #endif
   #endif
 
-  #if AXIS_IS_TMC(Z2)
-    #define Z2_CURRENT      800
-    #define Z2_CURRENT_HOME Z2_CURRENT
-    #define Z2_MICROSTEPS    16
-    #define Z2_RSENSE         0.11
-    #define Z2_CHAIN_POS     -1
+  #if COREXY_PLASMA
+    #define HOLD_MULTIPLIER    0.1  // Scales down the holding current from run current
+    #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
+
+    #if AXIS_IS_TMC(X)
+      #define X_CURRENT       1400        // (mA) RMS current. Multiply by 1.414 for peak current.
+      #define X_CURRENT_HOME  600  // (mA) RMS current for sensorless homing
+      #define X_MICROSTEPS     256    // 0..256
+      #define X_RSENSE          0.11
+      #define X_CHAIN_POS      -1    // <=0 : Not chained. 1 : MCU MOSI connected. 2 : Next in chain, ...
+    #endif
+
+    #if AXIS_IS_TMC(Y)
+      #define Y_CURRENT       1400
+      #define Y_CURRENT_HOME  600
+      #define Y_MICROSTEPS     256
+      #define Y_RSENSE          0.11
+      #define Y_CHAIN_POS      -1
+    #endif
+
+    #if AXIS_IS_TMC(Z)
+      #define Z_CURRENT       1400
+      #define Z_CURRENT_HOME  600
+      #define Z_MICROSTEPS     256
+      #define Z_RSENSE          0.11
+      #define Z_CHAIN_POS      -1
+    #endif
   #endif
 
-  #if AXIS_IS_TMC(Z3)
-    #define Z3_CURRENT      800
-    #define Z3_CURRENT_HOME Z3_CURRENT
-    #define Z3_MICROSTEPS    16
-    #define Z3_RSENSE         0.11
-    #define Z3_CHAIN_POS     -1
-  #endif
 
-  #if AXIS_IS_TMC(Z4)
-    #define Z4_CURRENT      800
-    #define Z4_CURRENT_HOME Z4_CURRENT
-    #define Z4_MICROSTEPS    16
-    #define Z4_RSENSE         0.11
-    #define Z4_CHAIN_POS     -1
-  #endif
 
-  #if AXIS_IS_TMC(E0)
-    #define E0_CURRENT      800
-    #define E0_MICROSTEPS    16
-    #define E0_RSENSE         0.11
-    #define E0_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E1)
-    #define E1_CURRENT      800
-    #define E1_MICROSTEPS    16
-    #define E1_RSENSE         0.11
-    #define E1_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E2)
-    #define E2_CURRENT      800
-    #define E2_MICROSTEPS    16
-    #define E2_RSENSE         0.11
-    #define E2_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E3)
-    #define E3_CURRENT      800
-    #define E3_MICROSTEPS    16
-    #define E3_RSENSE         0.11
-    #define E3_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E4)
-    #define E4_CURRENT      800
-    #define E4_MICROSTEPS    16
-    #define E4_RSENSE         0.11
-    #define E4_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E5)
-    #define E5_CURRENT      800
-    #define E5_MICROSTEPS    16
-    #define E5_RSENSE         0.11
-    #define E5_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E6)
-    #define E6_CURRENT      800
-    #define E6_MICROSTEPS    16
-    #define E6_RSENSE         0.11
-    #define E6_CHAIN_POS     -1
-  #endif
-
-  #if AXIS_IS_TMC(E7)
-    #define E7_CURRENT      800
-    #define E7_MICROSTEPS    16
-    #define E7_RSENSE         0.11
-    #define E7_CHAIN_POS     -1
-  #endif
 
   /**
    * Override default SPI pins for TMC2130, TMC2160, TMC2660, TMC5130 and TMC5160 drivers here.
@@ -2558,10 +2510,11 @@
       #define Y2_STALL_SENSITIVITY 52
       #define Z_STALL_SENSITIVITY  80
     #endif
-    //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
-    //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
-    //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
-    //#define SPI_ENDSTOPS              // TMC2130 only
+    #if COREXY_PLASMA
+      #define X_STALL_SENSITIVITY  47
+      #define Y_STALL_SENSITIVITY  52
+      #define Z_STALL_SENSITIVITY  80
+    #endif
     //#define IMPROVE_HOMING_RELIABILITY
   #endif
 
@@ -3229,7 +3182,12 @@
  */
 #define CUSTOM_USER_MENUS
 #if ENABLED(CUSTOM_USER_MENUS)
-  #define CUSTOM_USER_MENU_TITLE "MPCNC Commands"
+  #if MPCNC_PLASMA
+    #define CUSTOM_USER_MENU_TITLE "MPCNC Commands"
+  #endif 
+  #if COREXY_PLASMA
+    #define CUSTOM_USER_MENU_TITLE "CoreXY Commands"
+  #endif 
   #define USER_SCRIPT_DONE "M117 User Script Done"
   #define USER_SCRIPT_AUDIBLE_FEEDBACK
   #define USER_SCRIPT_RETURN  // Return to status screen after a script
