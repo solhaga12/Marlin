@@ -1167,8 +1167,14 @@
 // @section machine
 
 // The size of the print bed
-#define X_BED_SIZE 1040
-#define Y_BED_SIZE 530
+#if MPCNC_PLASMA
+  #define X_BED_SIZE 1040
+  #define Y_BED_SIZE 530
+#endif
+#if COREXY_PLASMA
+  #define X_BED_SIZE 1040
+  #define Y_BED_SIZE 530
+#endif
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
