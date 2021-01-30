@@ -646,10 +646,11 @@
 #define USE_XMIN_PLUG
 #define USE_YMIN_PLUG
 #define USE_ZMIN_PLUG
-#define USE_XMAX_PLUG
-#define USE_YMAX_PLUG
-//#define USE_ZMAX_PLUG
-
+#if MPNCN_PLASMA
+  #define USE_XMAX_PLUG
+  #define USE_YMAX_PLUG
+  #define USE_ZMAX_PLUG
+#endif
 // Enable pullup for all endstops to prevent a floating state
 #define ENDSTOPPULLUPS
 #if DISABLED(ENDSTOPPULLUPS)
@@ -704,8 +705,10 @@
 #define X_DRIVER_TYPE  TMC2209
 #define Y_DRIVER_TYPE  TMC2209
 #define Z_DRIVER_TYPE  TMC2209
-#define X2_DRIVER_TYPE TMC2209
-#define Y2_DRIVER_TYPE TMC2209
+#if MPCNC_PLASMA
+  #define X2_DRIVER_TYPE TMC2209
+  #define Y2_DRIVER_TYPE TMC2209
+#endif
 //#define Z2_DRIVER_TYPE A4988
 //#define Z3_DRIVER_TYPE A4988
 //#define Z4_DRIVER_TYPE A4988
