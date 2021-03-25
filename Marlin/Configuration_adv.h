@@ -2309,25 +2309,25 @@
     #define INTERPOLATE       true  // Interpolate X/Y/Z_MICROSTEPS to 256
 
     #if AXIS_IS_TMC(X)
-      #define X_CURRENT       2000        // (mA) RMS current. Multiply by 1.414 for peak current.
+      #define X_CURRENT       1400        // (mA) RMS current. Multiply by 1.414 for peak current.
       #define X_CURRENT_HOME  800  // (mA) RMS current for sensorless homing
-      #define X_MICROSTEPS     16    // 0..256
+      #define X_MICROSTEPS     256    // 0..256
       #define X_RSENSE          0.11
       #define X_CHAIN_POS      -1    // <=0 : Not chained. 1 : MCU MOSI connected. 2 : Next in chain, ...
     #endif
 
     #if AXIS_IS_TMC(Y)
-      #define Y_CURRENT       2000
+      #define Y_CURRENT       1400
       #define Y_CURRENT_HOME  800
-      #define Y_MICROSTEPS     16
+      #define Y_MICROSTEPS     256
       #define Y_RSENSE          0.11
       #define Y_CHAIN_POS      -1
     #endif
 
     #if AXIS_IS_TMC(Z)
       #define Z_CURRENT       1400
-      #define Z_CURRENT_HOME  600
-      #define Z_MICROSTEPS     256
+      #define Z_CURRENT_HOME  800
+      #define Z_MICROSTEPS     32
       #define Z_RSENSE          0.11
       #define Z_CHAIN_POS      -1
     #endif
@@ -2511,9 +2511,9 @@
       #define Z_STALL_SENSITIVITY  80
     #endif
     #if COREXY_PLASMA
-      #define X_STALL_SENSITIVITY  200
-      #define Y_STALL_SENSITIVITY  200
-      #define Z_STALL_SENSITIVITY  80
+      #define X_STALL_SENSITIVITY  80
+      #define Y_STALL_SENSITIVITY  80
+      #define Z_STALL_SENSITIVITY  110
     #endif
     //#define IMPROVE_HOMING_RELIABILITY
   #endif

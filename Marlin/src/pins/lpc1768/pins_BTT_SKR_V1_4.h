@@ -431,7 +431,7 @@
 
 // Plasma
 #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
-#define PLASMA_START_PIN  P2_00 // Plasma start relay, output.
+#define PLASMA_START_PIN  P2_00 // Plasma start relay NO, output.
 #define PLASMA_TRANSFER_PIN P0_10	// Plasma transfer, input. Plasma is ready to receive gcode
 #define PLASMA_VD_UPDATES_PIN P1_24 // Plasma update; to see the sample time on an oscilloscope
 

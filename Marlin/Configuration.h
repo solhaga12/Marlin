@@ -684,7 +684,7 @@
 #define X_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Y_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
 #define Z_MAX_ENDSTOP_INVERTING false // Set to true to invert the logic of the endstop.
-#define Z_MIN_PROBE_ENDSTOP_INVERTING false // Set to true to invert the logic of the probe.
+#define Z_MIN_PROBE_ENDSTOP_INVERTING true // Set to true to invert the logic of the probe.
 
 /**
  * Stepper Drivers
@@ -771,8 +771,10 @@
   #define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
 #endif
 #if COREXY_PLASMA
-  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 1280, 1280, 25600, 500 } // 1/256 uStep
-  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 16*5, 16*5, 25600, 500 } // 1/1
+  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 256*5, 256*5, 25600, 500 } // 20 teeth pulley 1/256 uStep
+  #define DEFAULT_AXIS_STEPS_PER_UNIT   { 256*2.5, 256*2.5, 32*50, 500 } // 40 teeth pulley 1/256 uStep
+  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 16*5, 16*5, 25600, 500 } // 1/16
+  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 5, 5, 25600, 500 } // 1/1
 #endif
 
 
@@ -785,7 +787,7 @@
   #define DEFAULT_MAX_FEEDRATE          { 140, 140, 30, 25 }
 #endif
 #if COREXY_PLASMA
-  #define DEFAULT_MAX_FEEDRATE          { 140, 140, 30, 25 }
+  #define DEFAULT_MAX_FEEDRATE          { 140, 140, 140, 25 }
 #endif
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
@@ -803,7 +805,7 @@
   #define DEFAULT_MAX_ACCELERATION      { 200, 200, 200, 2000 }
 #endif
 #if COREXY_PLASMA
-  #define DEFAULT_MAX_ACCELERATION      { 200, 200, 200, 2000 }
+  #define DEFAULT_MAX_ACCELERATION      { 500, 500, 500, 200 }
 #endif
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
@@ -819,9 +821,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          200    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_ACCELERATION          500    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  3000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   200    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_TRAVEL_ACCELERATION   500    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk limits (mm/s)
@@ -1176,8 +1178,8 @@
   #define Y_BED_SIZE 530
 #endif
 #if COREXY_PLASMA
-  #define X_BED_SIZE 1040
-  #define Y_BED_SIZE 530
+  #define X_BED_SIZE 1170
+  #define Y_BED_SIZE 560
 #endif
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
@@ -1190,7 +1192,7 @@
   #define Z_MAX_POS 110
 #endif
 #if COREXY_PLASMA
-  #define Z_MAX_POS 110
+  #define Z_MAX_POS 120
 #endif
 
 /**
@@ -1453,7 +1455,7 @@
 #endif
 
 // Homing speeds (mm/min)
-#define HOMING_FEEDRATE_XY (50*60)
+#define HOMING_FEEDRATE_XY (70*60)
 #define HOMING_FEEDRATE_Z  (10*60)
 
 // Validate that endstops are triggered on homing moves
