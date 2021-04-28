@@ -135,15 +135,11 @@
 //=============================================================================
 //#define MPCNC_PLASMA 1
 #define COREXY_PLASMA 1
-//#define PLASMA_THC 1
-#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+#if COREXY_PLASMA
   #define PLASMA_START_INVERTING  true // set to true to invert the plasma logic.
   #define PLASMA_TRANSFER_INVERTING true // set to true to invert the transfer logic.
 
   #define PLASMA_TRANSFER_TIMEOUT_MS 1000
-  #if PLASMA_THC
-    #define PLASMA_MAX_THC_STEP_S 7000 // set the maximal step frequency for THC module (it's all about CPU capabilities)
-  #endif
 #endif
 
 // Name displayed in the LCD "Ready" message and Info menu
@@ -771,10 +767,7 @@
   #define DEFAULT_AXIS_STEPS_PER_UNIT   { 3200, 3200, 12800, 500 }
 #endif
 #if COREXY_PLASMA
-  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 256*5, 256*5, 25600, 500 } // 20 teeth pulley 1/256 uStep
   #define DEFAULT_AXIS_STEPS_PER_UNIT   { 256*2.5, 256*2.5, 32*50, 500 } // 40 teeth pulley 1/256 uStep
-  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 16*5, 16*5, 25600, 500 } // 1/16
-  //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 5, 5, 25600, 500 } // 1/1
 #endif
 
 
@@ -1072,10 +1065,10 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
-#define Z_CLEARANCE_BETWEEN_PROBES  5 // Z Clearance between probe points
-#define Z_CLEARANCE_MULTI_PROBE     5 // Z Clearance between multiple probes
-//#define Z_AFTER_PROBING           5 // Z position after probing is done
+#define Z_CLEARANCE_DEPLOY_PROBE    4 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_BETWEEN_PROBES  4 // Z Clearance between probe points
+#define Z_CLEARANCE_MULTI_PROBE     4 // Z Clearance between multiple probes
+//#define Z_AFTER_PROBING           4 // Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -2 // Farthest distance below the trigger-point to go before stopping
 
@@ -1157,12 +1150,12 @@
 
 //#define NO_MOTION_BEFORE_HOMING // Inhibit movement until all axes have been homed
 
-//#define UNKNOWN_Z_NO_RAISE      // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
+#define UNKNOWN_Z_NO_RAISE      // Don't raise Z (lower the bed) if Z is "unknown." For beds that fall when Z is powered off.
 
-#define Z_HOMING_HEIGHT  10      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
+#define Z_HOMING_HEIGHT  4      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
-#define Z_AFTER_HOMING  10      // (mm) Height to move to after homing Z
+#define Z_AFTER_HOMING  4      // (mm) Height to move to after homing Z
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]

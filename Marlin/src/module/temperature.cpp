@@ -36,6 +36,10 @@
 
 #include "../lcd/ultralcd.h"
 
+#if ANY(MPCNC_PLASMA, COREXY_PLASMA)
+  #include "plasma.h"
+#endif
+
 #if ENABLED(DWIN_CREALITY_LCD)
   #include "../lcd/dwin/e3v2/dwin.h"
 #endif
@@ -149,8 +153,25 @@ const char str_t_thermal_runaway[] PROGMEM = STR_T_THERMAL_RUNAWAY,
 #define _E_PSTR(h,N) ((HOTENDS) > N && (h) == N) ? PSTR(LCD_STR_E##N) :
 #define HEATER_PSTR(h) _BED_PSTR(h) _CHAMBER_PSTR(h) _E_PSTR(h,1) _E_PSTR(h,2) _E_PSTR(h,3) _E_PSTR(h,4) _E_PSTR(h,5) PSTR(LCD_STR_E0)
 
+/**
+ * Class and Instance Methods
+ */
+
+// private:
+#if COREXY_PLASMA
+  float_t Temperature::babystep_position = float_t();
+  #define BABYSTEP 0.01
+#endif
 // public:
 
+#if COREXY_PLASMA
+  float_t Temperature::getBabystepPosition(void) {
+    return babystep_position;
+  }
+  void Temperature::setBabystepPosition(float_t babystep_position_) {
+    babystep_position = babystep_position_;
+  }
+#endif
 #if ENABLED(NO_FAN_SLOWING_IN_PID_TUNING)
   bool Temperature::adaptive_fan_slowing = true;
 #endif
@@ -1686,6 +1707,9 @@ void Temperature::init() {
 
   TERN_(MAX6675_IS_MAX31865, max31865.begin(MAX31865_2WIRE)); // MAX31865_2WIRE, MAX31865_3WIRE, MAX31865_4WIRE
 
+  babystep_position = 0.0;
+  babystep.add_mm(Z_AXIS, babystep_position);
+
   #if EARLY_WATCHDOG
     // Flag that the thermalManager should be running
     if (inited) return;
@@ -1802,6 +1826,11 @@ void Temperature::init() {
 
   HAL_adc_init();
 
+  #if COREXY_PLASMA
+    HAL_ANALOG_SELECT(VOLTAGE_DIVIDER_PLUS_PIN);
+    HAL_ANALOG_SELECT(VOLTAGE_DIVIDER_MINUS_PIN);
+  #endif
+
   #if HAS_TEMP_ADC_0
     HAL_ANALOG_SELECT(TEMP_0_PIN);
   #endif
@@ -1890,9 +1919,6 @@ void Temperature::init() {
   #if HAS_AUTO_CHAMBER_FAN && !AUTO_CHAMBER_IS_E
     INIT_CHAMBER_AUTO_FAN_PIN(CHAMBER_AUTO_FAN_PIN);
   #endif
-
-  // Wait for temperature measurement to settle
-  delay(250);
 
   #if HAS_HOTEND
 
@@ -2505,6 +2531,14 @@ void Temperature::tick() {
   // avoid multiple loads of pwm_count
   uint8_t pwm_count_tmp = pwm_count;
 
+  #if COREXY_PLASMA
+        float_t actualThcVoltage = float_t();
+    static uint16_t voltage_minus = uint16_t();
+    static uint16_t voltage_plus = uint16_t();
+    #define OFFSET 50
+    #define SLOPE 14.4
+  #endif
+
   #if HAS_ADC_BUTTONS
     static unsigned int raw_ADCKey_value = 0;
     static bool ADCKey_pressed = false;
@@ -2787,6 +2821,10 @@ void Temperature::tick() {
   switch (adc_sensor_state) {
 
     case SensorsReady: {
+      #if COREXY_PLASMA
+        adc_sensor_state = StartSampling;                 // Fall-through to start sampling
+        next_sensor_state = (ADCSensorState)(int(StartSampling) + 1);
+      #else
       // All sensors have been read. Stay in this state for a few
       // ISRs to save on calls to temp update/checking code below.
       constexpr int8_t extra_loops = MIN_ADC_ISR_LOOPS - (int8_t)SensorsReady;
@@ -2801,6 +2839,7 @@ void Temperature::tick() {
         adc_sensor_state = StartSampling;                 // Fall-through to start sampling
         next_sensor_state = (ADCSensorState)(int(StartSampling) + 1);
       }
+      #endif
     }
 
     case StartSampling:                                   // Start of sampling loops. Do updates/checks.
@@ -2809,6 +2848,21 @@ void Temperature::tick() {
         readings_ready();
       }
       break;
+
+    #if COREXY_PLASMA
+      case PrepareTHC_1: HAL_START_ADC(VOLTAGE_DIVIDER_PLUS_PIN); break;
+      case MeasureTHC_1: 
+        voltage_plus = HAL_READ_ADC();
+        WRITE(PLASMA_VD_UPDATES_PIN, HIGH);
+        break;
+      case PrepareTHC_0: HAL_START_ADC(VOLTAGE_DIVIDER_MINUS_PIN); break;
+      case MeasureTHC_0: 
+        voltage_minus = HAL_READ_ADC();
+        WRITE(PLASMA_VD_UPDATES_PIN, LOW);
+        actualThcVoltage = ((voltage_plus - voltage_minus) - OFFSET)/SLOPE;
+        plasmaManager.setActualThcVoltage(actualThcVoltage);
+        break;
+    #endif
 
     #if HAS_TEMP_ADC_0
       case PrepareTemp_0: HAL_START_ADC(TEMP_0_PIN); break;
@@ -2942,12 +2996,66 @@ void Temperature::tick() {
   adc_sensor_state = next_sensor_state;
 
   //
-  // Additional ~1KHz Tasks
+  // Additional ~100 Hz Tasks
+  //
+  #if COREXY_PLASMA && ENABLED(BABYSTEPPING) && DISABLED(INTEGRATED_BABYSTEPPING)
+    // Check if THC is enabled
+    if (plasmaManager.isThcEnabled() == true) {
+       // Check hysteresis
+      if (abs(plasmaManager.getWantedThcVoltage() - plasmaManager.getActualThcVoltage()) > 1) {
+        // Calculate direction
+        if (plasmaManager.getWantedThcVoltage() > plasmaManager.getActualThcVoltage()) {
+          babystep_position += BABYSTEP;
+          if (babystep_position > 20.0) { // check max limit, should be 20!
+            babystep_position = 20.0;
+          } else {
+            babystep.add_mm(Z_AXIS, BABYSTEP);
+          }
+        } else {
+          babystep_position -= BABYSTEP;
+          if (babystep_position < -20.0) { // check min limit, should be -20
+            babystep_position = -20.0;
+          } else {
+            babystep.add_mm(Z_AXIS, -BABYSTEP);
+          }
+        }
+      }
+    }
+  #endif
+
+  //
+  // Additional ~1 kHz Tasks
   //
 
-  #if ENABLED(BABYSTEPPING) && DISABLED(INTEGRATED_BABYSTEPPING)
+  #if ENABLED(BABYSTEPPING) && DISABLED(INTEGRATED_BABYSTEPPING)      
     babystep.task();
+    #if COREXY_PLASMA
+    if (plasmaManager.isThcEnabled() == true) {
+      babystep.task();
+      babystep.task();
+      babystep.task();
+    }
+    #endif
   #endif
+    
+  // Collision detection.
+  // What shall be done?
+  // It's probably some dross on the torch or on the steel.
+  // Just raise using babstep and hope that the next cut will succeed?
+  #if COREXY_PLASMA
+  if ((READ(Z_MIN_PROBE_PIN) == LOW) && plasmaManager.isThcEnabled() ) {
+    SERIAL_ECHOLN("Collision detected.");
+    babystep.add_mm(Z_AXIS, 500*BABYSTEP);
+    plasmaManager.disableThc();
+      babystep.task();
+      babystep.task();
+      babystep.task();
+      babystep.task();
+      babystep.task();
+      babystep.task();
+  }
+  #endif
+
 
   // Poll endstops state, if required
   endstops.poll();

@@ -876,6 +876,8 @@ private:
   #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
     static void M2101();                  // M2101: Set or get dry run. M2101 S0/S1, false/true
     static void M2102();                  // M2102: Get THC voltage
+    static void M2103();                  // M2103: Increase babysteps
+    static void M2104();                  // M2104: Decrease babysteps
     static void M2106();                  // M2106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
     static void M2107();                  // M2107: Stop plasma cutter
   #endif

@@ -923,6 +923,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ANY(MPCNC_PLASMA, COREXY_PLASMA)
         case 2101: M2101(); break;                                  // M2101: Set or get dry run. S0/S1, false/true
         case 2102: M2102(); break;                                  // M2102: Get actual THC voltage
+        case 2103: M2103(); break;                                  // M2103: Increase babysteps
+        case 2104: M2104(); break;                                  // M2104: Decrease babysteps
         case 2106: M2106(); break;                                  // M2106: Start plasma cutter V<Voltage> D<Delay> H<Height> I<InitialHeight>
         case 2107: M2107(); break;                                  // M2107: Stop plasma cutter
       #endif

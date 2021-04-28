@@ -86,6 +86,10 @@ hotend_pid_t;
  */
 enum ADCSensorState : char {
   StartSampling,
+  #if COREXY_PLASMA
+    PrepareTHC_1, MeasureTHC_1,
+    PrepareTHC_0, MeasureTHC_0,
+  #endif
   #if HAS_TEMP_ADC_0
     PrepareTemp_0, MeasureTemp_0,
   #endif
@@ -305,6 +309,13 @@ class Temperature {
       static hotend_info_t temp_hotend[HOTEND_TEMPS];
       static const uint16_t heater_maxtemp[HOTENDS];
     #endif
+
+    #if COREXY_PLASMA
+      static float_t getBabystepPosition(void);
+      static void setBabystepPosition(float_t babystep_position);
+    #endif
+    
+
     TERN_(HAS_HEATED_BED, static bed_info_t temp_bed);
     TERN_(HAS_TEMP_PROBE, static probe_info_t temp_probe);
     TERN_(HAS_TEMP_CHAMBER, static chamber_info_t temp_chamber);
@@ -375,6 +386,9 @@ class Temperature {
     TERN_(EARLY_WATCHDOG, static bool inited);   // If temperature controller is running
 
     static volatile bool raw_temps_ready;
+    #if COREXY_PLASMA
+      static float_t babystep_position;
+    #endif
 
     TERN_(WATCH_HOTENDS, static hotend_watch_t watch_hotend[HOTENDS]);
 

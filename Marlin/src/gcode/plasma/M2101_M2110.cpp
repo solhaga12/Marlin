@@ -38,6 +38,10 @@
 #include "../../module/stepper.h"
 #include "../../module/planner.h"
 #include "../../libs/numtostr.h"
+#include "../../module/temperature.h"
+#if ENABLED(BABYSTEPPING) && DISABLED(INTEGRATED_BABYSTEPPING)
+  #include "../../feature/babystep.h"
+#endif
 
 void GcodeSuite::M2101() {
 
@@ -53,8 +57,17 @@ void GcodeSuite::M2101() {
 }
 
 void GcodeSuite::M2102() {
-// Just for test
-  SERIAL_ECHOLNPAIR("THC voltage is ", "78");
+  SERIAL_ECHOLNPAIR("ActualTHCVoltage: ", plasmaManager.getActualThcVoltage(), ", Babystep accum: ",  babystep.accum, ", Babystep position: ",  thermalManager.getBabystepPosition());
+}
+
+void GcodeSuite::M2103() {
+  babystep.add_mm(Z_AXIS, 0.1);
+  SERIAL_ECHOLNPAIR("Babystep accum: ", babystep.accum);
+}
+
+void GcodeSuite::M2104() {
+  babystep.add_mm(Z_AXIS, -0.1);
+  SERIAL_ECHOLNPAIR("Babystep accum: ", babystep.accum);;
 }
 
 void GcodeSuite::M2106() {
@@ -68,14 +81,14 @@ void GcodeSuite::M2106() {
   #define WAIT_FOR_PLASMA 30
 
   if (parser.seen('V')) {
-    voltage = parser.value_byte();
+    voltage = parser.value_ushort();
     if ((voltage < 50) || (voltage > 200)) {
       voltage = 125;
     }
   }
 
   if (parser.seen('D')) {
-    pierceDelay = parser.value_byte();
+    pierceDelay = parser.value_ushort();
     if (pierceDelay > 2000) {
       pierceDelay = 100;
     }
@@ -97,9 +110,7 @@ void GcodeSuite::M2106() {
 
   SERIAL_ECHOLNPAIR("Start plasma, V = ", voltage, " D = ", pierceDelay, " H = ", height, " I = ", initialHeight);
   
-  #if PLASMA_THC
-    plasmaManager.setWantedThcVoltage(voltage * SLOPE);
-  #endif
+    plasmaManager.setWantedThcVoltage(voltage);
   
   // gcode homes Z
   // Set Z initial height
@@ -115,9 +126,8 @@ void GcodeSuite::M2106() {
       if (IS_PLASMA_TRANSFERRED)
       {
         SERIAL_ECHOLN("PLASMA TRANSFER");
-        #if PLASMA_THC
-          plasmaManager.enableThc();
-        #endif
+        thermalManager.setBabystepPosition(0.0);
+        plasmaManager.enableThc();
         break;
       }
       delay(WAIT_FOR_PLASMA_LOOP);
@@ -127,17 +137,14 @@ void GcodeSuite::M2106() {
       SERIAL_ECHOLN("Dry run");
       TURN_PLASMA_OFF
       SERIAL_ECHOLN("PLASMA STOP");
-      #if PLASMA_THC
-        plasmaManager.disableThc();
-      #endif
+      plasmaManager.disableThc();
+      thermalManager.setBabystepPosition(0.0);
       plasmaManager.setDryRun(true);
     }
   }
   else {
     TURN_PLASMA_OFF
-    #if PLASMA_THC
-      plasmaManager.disableThc();
-    #endif
+    plasmaManager.disableThc();
   }
 
   // Delay for pierce and then descend to cut height
@@ -149,13 +156,14 @@ void GcodeSuite::M2106() {
 }
 
 void GcodeSuite::M2107() {
-
+  char gcode_string[80];
   SERIAL_ECHOLN("PLASMA STOP");
   TURN_PLASMA_OFF
-  //plasmaManager.setDryRun(false);
-  #if PLASMA_THC
-    plasmaManager.disableThc();
-  #endif
+  plasmaManager.setDryRun(false);
+  plasmaManager.disableThc();
+  thermalManager.setBabystepPosition(0.0);
+  sprintf_P(gcode_string, PSTR("G0 Z10 F1200"));
+  process_subcommands_now(gcode_string);
   planner.synchronize();  // Should be the same as stepper.synchronize
 }
 #endif

@@ -434,6 +434,8 @@
 #define PLASMA_START_PIN  P2_00 // Plasma start relay NO, output.
 #define PLASMA_TRANSFER_PIN P0_10	// Plasma transfer, input. Plasma is ready to receive gcode
 #define PLASMA_VD_UPDATES_PIN P1_24 // Plasma update; to see the sample time on an oscilloscope
+#define PLASMA_DEBUG_1_PIN P1_25
+#define PLASMA_DEBUG_2_PIN P1_26
 
 #define VOLTAGE_DIVIDER_PLUS_PIN P0_23_A0   // Voltage divider plus, analog input
 #define VOLTAGE_DIVIDER_MINUS_PIN P0_24_A1  // Voltage divider minus, analog input
