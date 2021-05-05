@@ -206,6 +206,7 @@ const char* ftostr31ns(const float &f) {
 const char* ftostr41ns(const float &f) {
   const long i = UINTFLOAT(f, 1);
   conv[2] = DIGIMOD(i, 1000);
+  if (conv[2]  == '0') conv[2] = ' '; 
   conv[3] = DIGIMOD(i, 100);
   conv[4] = DIGIMOD(i, 10);
   conv[5] = '.';

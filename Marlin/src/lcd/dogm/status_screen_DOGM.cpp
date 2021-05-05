@@ -37,6 +37,7 @@
 
 #include "../../module/motion.h"
 #include "../../module/temperature.h"
+#include "../../module/plasma.h"
 
 #if ENABLED(FILAMENT_LCD_DISPLAY)
   #include "../../feature/filwidth.h"
@@ -805,8 +806,8 @@ void MarlinUI::draw_status_screen() {
     lcd_put_wchar(3, EXTRAS_2_BASELINE, LCD_STR_FEEDRATE[0]);
 
     set_font(FONT_STATUSMENU);
-    lcd_put_u8str(12, EXTRAS_2_BASELINE, i16tostr3rj(feedrate_percentage));
-    lcd_put_wchar('%');
+    lcd_put_u8str(12, EXTRAS_2_BASELINE, ftostr41ns(plasmaManager.getActualThcVoltage()));
+    //lcd_put_wchar('%');
 
     //
     // Filament sensor display if SD is disabled

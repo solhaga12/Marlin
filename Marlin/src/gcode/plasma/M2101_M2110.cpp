@@ -57,17 +57,15 @@ void GcodeSuite::M2101() {
 }
 
 void GcodeSuite::M2102() {
-  SERIAL_ECHOLNPAIR("ActualTHCVoltage: ", plasmaManager.getActualThcVoltage(), ", Babystep accum: ",  babystep.accum, ", Babystep position: ",  thermalManager.getBabystepPosition());
+  SERIAL_ECHOLNPAIR("THC: ", plasmaManager.getActualThcVoltage());
 }
 
 void GcodeSuite::M2103() {
-  babystep.add_mm(Z_AXIS, 0.1);
-  SERIAL_ECHOLNPAIR("Babystep accum: ", babystep.accum);
+  SERIAL_ECHOLNPAIR("WantedTHCVoltage: ", plasmaManager.getWantedThcVoltage());
 }
 
 void GcodeSuite::M2104() {
-  babystep.add_mm(Z_AXIS, -0.1);
-  SERIAL_ECHOLNPAIR("Babystep accum: ", babystep.accum);;
+  SERIAL_ECHOLNPAIR("ActualTHCVoltage: ", plasmaManager.getActualThcVoltage());
 }
 
 void GcodeSuite::M2106() {
