@@ -67,6 +67,9 @@ const char* ftostr12ns(const float &x);
 // Convert unsigned float to string with 12.3 format
 const char* ftostr31ns(const float &x);
 
+// Convert unsigned float to string with 123 format, leading zero omitted
+const char* ftostr040ns(const float &x);
+
 // Convert unsigned float to string with 123.4 format
 const char* ftostr41ns(const float &x);
 
